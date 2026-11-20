@@ -11,7 +11,7 @@ interface SlideLayoutProps {
 
 export const SlideLayout: React.FC<SlideLayoutProps> = ({
   slideNumber,
-  totalSlides = 12,
+  totalSlides = 11,
   title,
   subtitle,
   children,
@@ -27,44 +27,44 @@ export const SlideLayout: React.FC<SlideLayoutProps> = ({
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        padding: '52px 88px 48px 88px',
+        padding: '56px 100px 48px 100px',
         boxSizing: 'border-box',
         overflow: 'hidden',
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
-      {/* Top Academic Header */}
+      {/* Top Academic Course Header & Slide Counter */}
       {!hideHeaderFooter && (
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            fontSize: '15px',
+            fontSize: '22px',
             color: '#777777',
             letterSpacing: '0.04em',
             textTransform: 'uppercase',
-            fontWeight: 500,
+            fontWeight: 600,
             marginBottom: '16px',
           }}
         >
-          <div>Analysis of Algorithms — Nanjing University of Posts and Telecommunications</div>
-          <div>Slide {slideNumber} of {totalSlides}</div>
+          <div>Analysis of Algorithms</div>
+          <div>Slide {slideNumber} / {totalSlides}</div>
         </div>
       )}
 
-      {/* Slide Title and Divider */}
+      {/* Main Slide Title Banner */}
       {title && (
         <div style={{ marginBottom: '28px' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '20px', flexWrap: 'wrap' }}>
             <h1
               style={{
-                fontSize: '32px',
-                fontWeight: 600,
+                fontSize: '52px',
+                fontWeight: 700,
                 color: '#202124',
                 letterSpacing: '-0.02em',
                 margin: 0,
-                lineHeight: 1.2,
+                lineHeight: 1.15,
               }}
             >
               {title}
@@ -72,9 +72,9 @@ export const SlideLayout: React.FC<SlideLayoutProps> = ({
             {subtitle && (
               <span
                 style={{
-                  fontSize: '18px',
-                  color: '#777777',
-                  fontWeight: 400,
+                  fontSize: '30px',
+                  color: '#147D78',
+                  fontWeight: 500,
                 }}
               >
                 — {subtitle}
@@ -84,15 +84,15 @@ export const SlideLayout: React.FC<SlideLayoutProps> = ({
           <div
             style={{
               width: '100%',
-              height: '1px',
-              backgroundColor: '#E0E0E0',
-              marginTop: '14px',
+              height: '2px',
+              backgroundColor: '#147D78',
+              marginTop: '16px',
             }}
           />
         </div>
       )}
 
-      {/* Main Slide Content Area */}
+      {/* Slide Body Content */}
       <div
         style={{
           flex: 1,
@@ -105,22 +105,22 @@ export const SlideLayout: React.FC<SlideLayoutProps> = ({
         {children}
       </div>
 
-      {/* Restrained Academic Footer */}
+      {/* Restrained Academic Footer with Large Readable Caption */}
       {!hideHeaderFooter && (
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            fontSize: '13px',
-            color: '#999999',
+            fontSize: '20px',
+            color: '#888888',
             marginTop: '16px',
             paddingTop: '12px',
-            borderTop: '1px solid #F0F0F0',
+            borderTop: '1px solid #EBEBEB',
           }}
         >
           <span>Think Small: How Greedy Algorithms Compress Images</span>
-          <span>Topic: Greedy Algorithms &amp; Huffman Coding</span>
+          <span>Bahaeddine EL ATIGUI &bull; Hafssa Gammaz</span>
         </div>
       )}
     </div>

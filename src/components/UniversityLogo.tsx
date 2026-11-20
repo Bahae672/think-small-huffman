@@ -1,28 +1,32 @@
 import React, { useState } from 'react';
 
-export const UniversityLogo: React.FC = () => {
+interface UniversityLogoProps {
+  size?: number;
+}
+
+export const UniversityLogo: React.FC<UniversityLogoProps> = ({ size = 150 }) => {
   const [imageError, setImageError] = useState(false);
-  const logoPath = '/assets/njupt-wide-title-logo.png';
+  const logoPath = '/assets/njupt-square-emblem.png';
 
   return (
     <div
       style={{
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '80px',
-        margin: '0 auto 40px auto',
+        width: `${size}px`,
+        height: `${size}px`,
+        position: 'relative',
       }}
     >
       {!imageError ? (
         <img
           src={logoPath}
-          alt="Nanjing University of Posts and Telecommunications"
+          alt="NJUPT Square Emblem"
           onError={() => setImageError(true)}
           style={{
-            maxHeight: '75px',
-            maxWidth: '520px',
+            maxWidth: '100%',
+            maxHeight: '100%',
             objectFit: 'contain',
             display: 'block',
           }}
@@ -30,34 +34,41 @@ export const UniversityLogo: React.FC = () => {
       ) : (
         <div
           style={{
-            border: '1px solid #D0D0D0',
-            padding: '12px 28px',
-            borderRadius: '2px',
+            width: '100%',
+            height: '100%',
+            border: '2px solid #147D78',
+            borderRadius: '4px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#F7FCFC',
+            padding: '12px',
             textAlign: 'center',
-            backgroundColor: '#FAFAFA',
+            boxSizing: 'border-box',
           }}
         >
           <div
             style={{
-              fontSize: '20px',
-              fontWeight: 600,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: '#202124',
+              fontSize: '24px',
+              fontWeight: 700,
+              color: '#147D78',
               fontFamily: "'Inter', sans-serif",
+              letterSpacing: '0.05em',
             }}
           >
-            Nanjing University of Posts and Telecommunications
+            NJUPT
           </div>
           <div
             style={{
-              fontSize: '12px',
-              color: '#888888',
-              letterSpacing: '0.05em',
+              fontSize: '11px',
+              color: '#777777',
               marginTop: '4px',
+              lineHeight: 1.2,
             }}
           >
-            Asset slot: <code>public/assets/njupt-wide-title-logo.png</code>
+            Square Emblem Slot<br />
+            <code>njupt-square-emblem.png</code>
           </div>
         </div>
       )}

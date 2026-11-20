@@ -10,14 +10,29 @@ import { Slide08Optimality } from './slides/Slide08Optimality';
 import { Slide09Complexity } from './slides/Slide09Complexity';
 import { Slide10InteractiveDemo } from './slides/Slide10InteractiveDemo';
 import { Slide11Conclusion } from './slides/Slide11Conclusion';
-import { Slide12References } from './slides/Slide12References';
 import { SpeakerNotesDrawer } from './SpeakerNotesDrawer';
+
+// Max animation steps per slide (0-indexed)
+const MAX_STEPS: { [slideNumber: number]: number } = {
+  1: 0,
+  2: 1,
+  3: 1,
+  4: 1,
+  5: 2,
+  6: 6, // Step 0 (Initial 6 nodes) through Step 6 (Codes table)
+  7: 2,
+  8: 2,
+  9: 2,
+  10: 0, // Autonomous continuous 8-stage image transformation
+  11: 1,
+};
 
 export const Presentation: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState<number>(1);
+  const [slideStep, setSlideStep] = useState<number>(0);
   const [scale, setScale] = useState<number>(1);
   const [showNotes, setShowNotes] = useState<boolean>(false);
-  const totalSlides = 12;
+  const totalSlides = 11;
 
   // Viewport scaling for 1920 x 1080 logical resolution
   useEffect(() => {
@@ -32,13 +47,26 @@ export const Presentation: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const goToNextSlide = useCallback(() => {
-    setCurrentSlide((curr) => Math.min(totalSlides, curr + 1));
-  }, [totalSlides]);
+  const advanceStepOrSlide = useCallback(() => {
+    const maxStep = MAX_STEPS[currentSlide] || 0;
+    if (slideStep < maxStep) {
+      setSlideStep((s) => s + 1);
+    } else if (currentSlide < totalSlides) {
+      setCurrentSlide((c) => c + 1);
+      setSlideStep(0);
+    }
+  }, [currentSlide, slideStep, totalSlides]);
 
-  const goToPrevSlide = useCallback(() => {
-    setCurrentSlide((curr) => Math.max(1, curr - 1));
-  }, []);
+  const retreatStepOrSlide = useCallback(() => {
+    if (slideStep > 0) {
+      setSlideStep((s) => s - 1);
+    } else if (currentSlide > 1) {
+      const prevSlide = currentSlide - 1;
+      const prevMaxStep = MAX_STEPS[prevSlide] || 0;
+      setCurrentSlide(prevSlide);
+      setSlideStep(prevMaxStep);
+    }
+  }, [currentSlide, slideStep]);
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -64,10 +92,10 @@ export const Presentation: React.FC = () => {
 
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
         e.preventDefault();
-        goToNextSlide();
+        advanceStepOrSlide();
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
-        goToPrevSlide();
+        retreatStepOrSlide();
       } else if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         toggleFullscreen();
@@ -77,19 +105,20 @@ export const Presentation: React.FC = () => {
       } else if (e.key === 'Home') {
         e.preventDefault();
         setCurrentSlide(1);
+        setSlideStep(0);
       } else if (e.key === 'End') {
         e.preventDefault();
         setCurrentSlide(totalSlides);
+        setSlideStep(MAX_STEPS[totalSlides] || 0);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [goToNextSlide, goToPrevSlide, toggleFullscreen, totalSlides]);
+  }, [advanceStepOrSlide, retreatStepOrSlide, toggleFullscreen, totalSlides]);
 
-  // Click on background advances slide
+  // Click on background advances animation step or slide
   const handleSlideClick = (e: React.MouseEvent) => {
-    // If click originated from interactive elements (buttons, inputs, links, canvas), don't advance
     const target = e.target as HTMLElement;
     if (
       target.tagName === 'BUTTON' ||
@@ -97,42 +126,39 @@ export const Presentation: React.FC = () => {
       target.tagName === 'CANVAS' ||
       target.tagName === 'A' ||
       target.closest('button') ||
-      target.closest('input') ||
-      target.closest('.interactive-control')
+      target.closest('input')
     ) {
       return;
     }
-    goToNextSlide();
+    advanceStepOrSlide();
   };
 
   const renderSlideContent = () => {
     switch (currentSlide) {
       case 1:
-        return <Slide01Title />;
+        return <Slide01Title step={slideStep} />;
       case 2:
-        return <Slide02Problem />;
+        return <Slide02Problem step={slideStep} />;
       case 3:
-        return <Slide03PNG />;
+        return <Slide03PNG step={slideStep} />;
       case 4:
-        return <Slide04GreedyStrategy />;
+        return <Slide04GreedyStrategy step={slideStep} />;
       case 5:
-        return <Slide05Pseudocode />;
+        return <Slide05Pseudocode step={slideStep} />;
       case 6:
-        return <Slide06TreeConstruction />;
+        return <Slide06TreeConstruction step={slideStep} />;
       case 7:
-        return <Slide07MathematicalFormulation />;
+        return <Slide07MathematicalFormulation step={slideStep} />;
       case 8:
-        return <Slide08Optimality />;
+        return <Slide08Optimality step={slideStep} />;
       case 9:
-        return <Slide09Complexity />;
+        return <Slide09Complexity step={slideStep} />;
       case 10:
         return <Slide10InteractiveDemo />;
       case 11:
-        return <Slide11Conclusion />;
-      case 12:
-        return <Slide12References />;
+        return <Slide11Conclusion step={slideStep} />;
       default:
-        return <Slide01Title />;
+        return <Slide01Title step={slideStep} />;
     }
   };
 
@@ -157,74 +183,23 @@ export const Presentation: React.FC = () => {
           height: '1080px',
           transform: `scale(${scale})`,
           transformOrigin: 'center center',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
           backgroundColor: '#FFFFFF',
           position: 'relative',
-          cursor: currentSlide < totalSlides ? 'pointer' : 'default',
+          cursor: currentSlide < totalSlides || slideStep < (MAX_STEPS[currentSlide] || 0) ? 'pointer' : 'default',
         }}
       >
         {renderSlideContent()}
       </div>
 
-      {/* Discrete Corner Floating Pill for Presenter Notes & Fullscreen toggle */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: 'fixed',
-          bottom: '12px',
-          right: '16px',
-          display: 'flex',
-          gap: '8px',
-          opacity: 0.35,
-          transition: 'opacity 0.2s ease',
-          zIndex: 9999,
-        }}
-        onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
-        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.35')}
-      >
-        <button
-          type="button"
-          onClick={() => setShowNotes(!showNotes)}
-          title="Toggle Speaker Notes [S]"
-          style={{
-            padding: '5px 10px',
-            fontSize: '12px',
-            backgroundColor: 'rgba(32, 33, 36, 0.85)',
-            color: '#FFFFFF',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '3px',
-            cursor: 'pointer',
-            fontWeight: 500,
-          }}
-        >
-          Notes [S]
-        </button>
-        <button
-          type="button"
-          onClick={toggleFullscreen}
-          title="Toggle Fullscreen [F]"
-          style={{
-            padding: '5px 10px',
-            fontSize: '12px',
-            backgroundColor: 'rgba(32, 33, 36, 0.85)',
-            color: '#FFFFFF',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '3px',
-            cursor: 'pointer',
-            fontWeight: 500,
-          }}
-        >
-          Fullscreen [F]
-        </button>
-      </div>
-
-      {/* Presenter Speaker Notes Drawer */}
+      {/* Speaker Notes Drawer (Zero visible control bars on screen, toggled via 'S' or 'N' key) */}
       <SpeakerNotesDrawer
         currentSlide={currentSlide}
         isOpen={showNotes}
         onClose={() => setShowNotes(false)}
         onJumpToSlide={(slideNum) => {
           setCurrentSlide(slideNum);
+          setSlideStep(0);
         }}
       />
     </div>

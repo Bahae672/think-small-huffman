@@ -1,7 +1,11 @@
 import React from 'react';
 import { SlideLayout } from '../SlideLayout';
 
-export const Slide02Problem: React.FC = () => {
+interface Slide02ProblemProps {
+  step?: number;
+}
+
+export const Slide02Problem: React.FC<Slide02ProblemProps> = ({ step = 0 }) => {
   return (
     <SlideLayout
       slideNumber={2}
@@ -12,146 +16,112 @@ export const Slide02Problem: React.FC = () => {
         style={{
           display: 'grid',
           gridTemplateColumns: '1.05fr 0.95fr',
-          gap: '64px',
+          gap: '70px',
           height: '100%',
           alignItems: 'center',
         }}
       >
-        {/* Left Column: Context & Requirements */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+        {/* Left Column: Context & Core Question */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           <div>
             <div
               style={{
-                fontSize: '14px',
+                fontSize: '24px',
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 color: '#147D78',
                 letterSpacing: '0.06em',
-                marginBottom: '8px',
+                marginBottom: '12px',
               }}
             >
               Academic Scenario
             </div>
             <div
               style={{
-                fontSize: '21px',
-                lineHeight: 1.55,
-                color: '#333333',
+                fontSize: '32px',
+                lineHeight: 1.45,
+                color: '#202124',
               }}
             >
-              Modern university portals, digital learning repositories, and research platforms
-              store and serve millions of graphical assets:
+              Digital platforms host millions of academic assets: logos, lecture diagrams, UI icons, and technical screenshots.
             </div>
           </div>
 
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '14px',
-            }}
-          >
-            {[
-              'University title logos & insignia',
-              'Mathematical diagrams & charts',
-              'High-contrast UI icons & glyphs',
-              'Algorithmic execution screenshots',
-              'Digital courseware materials',
-              'Vector-rasterized figures',
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  fontSize: '17px',
-                  color: '#444444',
-                  padding: '8px 12px',
-                  backgroundColor: '#F8F9FA',
-                  borderLeft: '3px solid #147D78',
-                }}
-              >
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              padding: '22px 26px',
+              padding: '28px 32px',
               backgroundColor: '#FAFAFA',
-              border: '1px solid #E4E4E4',
+              borderLeft: '6px solid #147D78',
               borderRadius: '2px',
             }}
           >
             <div
               style={{
-                fontSize: '15px',
-                fontWeight: 600,
-                color: '#202124',
-                marginBottom: '8px',
-                letterSpacing: '0.02em',
+                fontSize: '22px',
+                fontWeight: 700,
+                color: '#147D78',
+                marginBottom: '10px',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
               }}
             >
-              THE CORE CONFLICT:
+              The Fundamental Constraint
             </div>
-            <div style={{ fontSize: '19px', color: '#555555', lineHeight: 1.5 }}>
-              Raw bitmaps consume massive network bandwidth and disk storage. Yet lossy compression (such as JPEG) destroys crisp line art, induces blur around fonts, and alters exact pixel values.
+            <div style={{ fontSize: '30px', color: '#333333', lineHeight: 1.4 }}>
+              Lossy compression alters pixel values and introduces blur around lines and fonts. <strong>Lossless fidelity is mandatory.</strong>
             </div>
           </div>
 
           <div
             style={{
-              borderLeft: '4px solid #147D78',
-              paddingLeft: '20px',
-              marginTop: '4px',
+              padding: '24px 28px',
+              backgroundColor: '#F7FCFC',
+              border: '2px solid #147D78',
+              opacity: step >= 0 ? 1 : 0.4,
+              transition: 'opacity 0.4s ease',
             }}
           >
-            <div style={{ fontSize: '15px', color: '#777777', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Central Research Question
+            <div style={{ fontSize: '20px', color: '#147D78', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>
+              Central Algorithmic Question
             </div>
             <div
               style={{
-                fontSize: '23px',
-                fontWeight: 600,
+                fontSize: '36px',
+                fontWeight: 700,
                 color: '#202124',
-                marginTop: '6px',
-                lineHeight: 1.4,
+                marginTop: '8px',
+                lineHeight: 1.35,
               }}
             >
-              How can we represent the same image information using fewer bits without losing any original information?
+              How can we represent the same image using fewer bits without losing any information?
             </div>
           </div>
         </div>
 
-        {/* Right Column: Academic Pipeline Diagram & Payload Comparison */}
+        {/* Right Column: High-Impact Animated Pipeline & Payload Comparison */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            alignItems: 'center',
             gap: '36px',
           }}
         >
-          {/* Minimalist Pipeline Diagram */}
+          {/* Data Flow Diagram */}
           <div
             style={{
-              width: '100%',
-              padding: '28px 32px',
-              border: '1px solid #E5E5E5',
+              padding: '32px 36px',
+              border: '2px solid #202124',
               backgroundColor: '#FFFFFF',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
             }}
           >
             <div
               style={{
-                fontSize: '13px',
-                color: '#888888',
-                letterSpacing: '0.05em',
+                fontSize: '22px',
+                color: '#777777',
+                letterSpacing: '0.06em',
                 textTransform: 'uppercase',
-                marginBottom: '20px',
+                marginBottom: '24px',
                 fontWeight: 600,
               }}
             >
@@ -166,37 +136,37 @@ export const Slide02Problem: React.FC = () => {
               }}
             >
               {[
-                { title: 'IMAGE DATA', sub: 'Uncompressed RGBA8' },
-                { title: 'STORAGE', sub: 'File Archive / DB' },
-                { title: 'TRANSMISSION', sub: 'HTTP / Client Net' },
-              ].map((step, idx) => (
+                { title: 'IMAGE DATA', sub: 'Raw Raster Bytes' },
+                { title: 'STORAGE', sub: 'Disk Archive' },
+                { title: 'TRANSMISSION', sub: 'Network Bandwidth' },
+              ].map((item, idx) => (
                 <React.Fragment key={idx}>
                   <div
                     style={{
-                      border: '1px solid #202124',
-                      padding: '16px 20px',
+                      border: '2px solid #202124',
+                      padding: '20px 24px',
                       textAlign: 'center',
-                      minWidth: '150px',
                       backgroundColor: '#FAFAFA',
+                      minWidth: '170px',
                     }}
                   >
-                    <div style={{ fontSize: '15px', fontWeight: 600, color: '#202124' }}>
-                      {step.title}
+                    <div style={{ fontSize: '26px', fontWeight: 700, color: '#202124' }}>
+                      {item.title}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#777777', marginTop: '4px' }}>
-                      {step.sub}
+                    <div style={{ fontSize: '20px', color: '#777777', marginTop: '6px' }}>
+                      {item.sub}
                     </div>
                   </div>
                   {idx < 2 && (
                     <div
                       style={{
-                        fontSize: '22px',
+                        fontSize: '36px',
                         color: '#147D78',
-                        fontWeight: 300,
+                        fontWeight: 700,
                         padding: '0 8px',
                       }}
                     >
-                      →
+                      &rarr;
                     </div>
                   )}
                 </React.Fragment>
@@ -204,50 +174,52 @@ export const Slide02Problem: React.FC = () => {
             </div>
           </div>
 
-          {/* Minimalist Comparison Figure */}
+          {/* Large Representation Comparison */}
           <div
             style={{
-              width: '100%',
-              padding: '24px 28px',
-              border: '1px solid #E5E5E5',
+              padding: '32px 36px',
+              border: '2px solid #E0E0E0',
               backgroundColor: '#FAFAFA',
+              opacity: step >= 1 ? 1 : 0.35,
+              transform: step >= 1 ? 'translateY(0)' : 'translateY(10px)',
+              transition: 'all 0.4s ease',
             }}
           >
-            <div style={{ fontSize: '13px', color: '#777777', marginBottom: '16px', fontWeight: 600, textTransform: 'uppercase' }}>
-              Comparison of Raster Representation Models
+            <div style={{ fontSize: '22px', color: '#777777', marginBottom: '20px', fontWeight: 700, textTransform: 'uppercase' }}>
+              Comparison of Payload Representations
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '6px' }}>
-                  <span style={{ fontWeight: 600 }}>Uncompressed 8-bit Fixed Payload (Uniform 8 bits/symbol)</span>
-                  <span style={{ color: '#777777' }}>100% Volume</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '24px', marginBottom: '8px' }}>
+                  <span style={{ fontWeight: 600 }}>Uncompressed Fixed 8-bit Encoding</span>
+                  <span style={{ color: '#777777', fontWeight: 600 }}>100% Volume</span>
                 </div>
-                <div style={{ width: '100%', height: '24px', backgroundColor: '#E0E0E0', border: '1px solid #CCCCCC' }}>
+                <div style={{ width: '100%', height: '36px', backgroundColor: '#E0E0E0', border: '1px solid #CCCCCC' }}>
                   <div
                     style={{
                       width: '100%',
                       height: '100%',
-                      backgroundColor: '#9E9E9E',
+                      backgroundColor: '#888888',
                       display: 'flex',
                       alignItems: 'center',
-                      paddingLeft: '10px',
-                      fontSize: '11px',
+                      paddingLeft: '16px',
+                      fontSize: '18px',
                       color: '#FFFFFF',
-                      fontWeight: 600,
+                      fontWeight: 700,
                     }}
                   >
-                    RAW BYTES (8 BITS EACH REGARDLESS OF FREQUENCY)
+                    UNIFORM 8 BITS PER SYMBOL
                   </div>
                 </div>
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '6px' }}>
-                  <span style={{ fontWeight: 600, color: '#147D78' }}>Lossless Variable-Length Entropy Payload (Huffman)</span>
-                  <span style={{ color: '#147D78', fontWeight: 600 }}>Significantly Reduced Payload</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '24px', marginBottom: '8px' }}>
+                  <span style={{ fontWeight: 700, color: '#147D78' }}>Lossless Variable-Length Entropy (Huffman)</span>
+                  <span style={{ color: '#147D78', fontWeight: 700 }}>Compressed Payload</span>
                 </div>
-                <div style={{ width: '100%', height: '24px', backgroundColor: '#E0E0E0', border: '1px solid #CCCCCC' }}>
+                <div style={{ width: '100%', height: '36px', backgroundColor: '#E0E0E0', border: '1px solid #CCCCCC' }}>
                   <div
                     style={{
                       width: '68%',
@@ -255,13 +227,13 @@ export const Slide02Problem: React.FC = () => {
                       backgroundColor: '#147D78',
                       display: 'flex',
                       alignItems: 'center',
-                      paddingLeft: '10px',
-                      fontSize: '11px',
+                      paddingLeft: '16px',
+                      fontSize: '18px',
                       color: '#FFFFFF',
-                      fontWeight: 600,
+                      fontWeight: 700,
                     }}
                   >
-                    FREQUENT: 1-4 BITS | RARE: 8-12 BITS
+                    FREQUENT: 1–3 BITS | RARE: 8+ BITS
                   </div>
                 </div>
               </div>
@@ -269,10 +241,10 @@ export const Slide02Problem: React.FC = () => {
 
             <div
               style={{
-                fontSize: '13px',
-                color: '#666666',
+                fontSize: '22px',
+                color: '#555555',
                 fontStyle: 'italic',
-                marginTop: '16px',
+                marginTop: '20px',
                 textAlign: 'center',
               }}
             >

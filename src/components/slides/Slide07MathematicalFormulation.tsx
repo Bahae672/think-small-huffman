@@ -1,12 +1,16 @@
 import React from 'react';
 import { SlideLayout } from '../SlideLayout';
 
-export const Slide07MathematicalFormulation: React.FC = () => {
+interface Slide07MathematicalFormulationProps {
+  step?: number;
+}
+
+export const Slide07MathematicalFormulation: React.FC<Slide07MathematicalFormulationProps> = ({ step = 0 }) => {
   return (
     <SlideLayout
       slideNumber={7}
-      title="Encoding Cost"
-      subtitle="Mathematical Formulation &amp; Compression Efficiency"
+      title="Theoretical Optimality & Shannon Entropy"
+      subtitle="Average Codeword Length versus Entropy Lower Bound"
     >
       <div
         style={{
@@ -14,180 +18,160 @@ export const Slide07MathematicalFormulation: React.FC = () => {
           flexDirection: 'column',
           height: '100%',
           justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '10px 40px',
+          padding: '10px 20px',
         }}
       >
-        {/* Large Centered Equation Box */}
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '1100px',
-            padding: '32px 40px',
-            backgroundColor: '#FAFAFA',
-            border: '1px solid #E5E5E5',
-            textAlign: 'center',
-            marginTop: '10px',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '14px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              color: '#777777',
-              letterSpacing: '0.08em',
-              marginBottom: '16px',
-            }}
-          >
-            Cost Objective Function (Total Payload Length)
-          </div>
-
-          <div
-            style={{
-              fontSize: '52px',
-              fontFamily: "'Crimson Pro', 'Latin Modern Math', 'Lora', serif",
-              fontWeight: 600,
-              color: '#202124',
-              letterSpacing: '0.02em',
-            }}
-          >
-            <span style={{ fontStyle: 'italic' }}>B</span> = &sum; (<span style={{ fontStyle: 'italic' }}>f<sub>i</sub></span> &times; <span style={{ fontStyle: 'italic' }}>l<sub>i</sub></span>)
-          </div>
-
-          <div
-            style={{
-              marginTop: '18px',
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '40px',
-              fontSize: '16px',
-              color: '#555555',
-            }}
-          >
-            <span><strong style={{ color: '#202124' }}>B</strong> : total number of encoded bits</span>
-            <span><strong style={{ color: '#202124' }}>f<sub>i</sub></strong> : frequency of symbol i</span>
-            <span><strong style={{ color: '#202124' }}>l<sub>i</sub></strong> : length of binary codeword for symbol i</span>
-          </div>
-        </div>
-
-        {/* 6-Symbol Example Quantitative Evaluation */}
+        {/* Top: 2 Main Theoretical Equations */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             gap: '48px',
-            width: '100%',
-            maxWidth: '1100px',
-            margin: '24px 0',
           }}
         >
-          {/* Method Comparison Card */}
+          {/* Average Code Length Card */}
           <div
             style={{
-              padding: '24px 28px',
-              backgroundColor: '#FFFFFF',
-              border: '1px solid #E0E0E0',
+              padding: '32px 36px',
+              backgroundColor: '#FAFAFA',
+              border: '2px solid #E2E2E2',
+              borderTop: '6px solid #147D78',
+              opacity: step >= 0 ? 1 : 0.4,
+              transition: 'opacity 0.4s ease',
             }}
           >
-            <div style={{ fontSize: '15px', fontWeight: 600, color: '#202124', textTransform: 'uppercase', marginBottom: '16px' }}>
-              Encoding Scheme Comparison (100 Symbols)
+            <div style={{ fontSize: '22px', fontWeight: 700, color: '#147D78', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
+              Average Codeword Length
             </div>
-
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '17px' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #202124' }}>
-                  <th style={{ padding: '8px 0', textAlign: 'left', fontWeight: 600 }}>Encoding Method</th>
-                  <th style={{ padding: '8px 0', textAlign: 'right', fontWeight: 600 }}>Bits Required</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: '1px solid #ECECEC' }}>
-                  <td style={{ padding: '12px 0', color: '#555555' }}>
-                    Fixed-length encoding (3 bits &times; 100)
-                  </td>
-                  <td style={{ padding: '12px 0', textAlign: 'right', fontFamily: 'monospace', fontSize: '18px' }}>
-                    300
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #ECECEC', backgroundColor: '#F4FAF9' }}>
-                  <td style={{ padding: '12px 0', fontWeight: 600, color: '#147D78' }}>
-                    Huffman variable-length encoding
-                  </td>
-                  <td style={{ padding: '12px 0', textAlign: 'right', fontFamily: 'monospace', fontSize: '20px', fontWeight: 700, color: '#147D78' }}>
-                    224
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div style={{ fontSize: '13px', color: '#777777', marginTop: '14px', lineHeight: 1.5 }}>
-              Huffman sum: (45&times;1) + (13&times;3) + (12&times;3) + (16&times;3) + (9&times;4) + (5&times;4) = 45 + 39 + 36 + 48 + 36 + 20 = 224 bits.
+            <div
+              style={{
+                fontSize: '48px',
+                fontFamily: "'Crimson Pro', 'Latin Modern Math', 'Lora', serif",
+                fontWeight: 700,
+                color: '#202124',
+                margin: '12px 0',
+              }}
+            >
+              <span style={{ fontStyle: 'italic' }}>L̄</span> = &sum; (<span style={{ fontStyle: 'italic' }}>p<sub>i</sub></span> &times; <span style={{ fontStyle: 'italic' }}>l<sub>i</sub></span>)
+            </div>
+            <div style={{ fontSize: '24px', color: '#555555', marginTop: '14px', lineHeight: 1.4 }}>
+              Where <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>p<sub>i</sub></span> is symbol probability and <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>l<sub>i</sub></span> is assigned Huffman codeword bit length.
             </div>
           </div>
 
-          {/* Savings Calculation Card */}
+          {/* Shannon Entropy Card */}
           <div
             style={{
-              padding: '24px 28px',
-              backgroundColor: '#FFFFFF',
-              border: '1px solid #E0E0E0',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
+              padding: '32px 36px',
+              backgroundColor: '#FAFAFA',
+              border: '2px solid #E2E2E2',
+              borderTop: '6px solid #202124',
+              opacity: step >= 1 ? 1 : 0.35,
+              transform: step >= 1 ? 'translateY(0)' : 'translateY(10px)',
+              transition: 'all 0.4s ease',
             }}
           >
-            <div>
-              <div style={{ fontSize: '15px', fontWeight: 600, color: '#202124', textTransform: 'uppercase', marginBottom: '8px' }}>
-                Mathematical Savings Calculation
-              </div>
-              <div style={{ fontSize: '16px', color: '#666666', fontFamily: 'monospace', marginBottom: '16px' }}>
-                Savings = ((300 &minus; 224) / 300) &times; 100 = (76 / 300) &times; 100
-              </div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
+              Shannon Source Entropy
             </div>
-
             <div
               style={{
-                padding: '16px 20px',
-                backgroundColor: '#F0F8F7',
-                borderLeft: '5px solid #147D78',
+                fontSize: '48px',
+                fontFamily: "'Crimson Pro', 'Latin Modern Math', 'Lora', serif",
+                fontWeight: 700,
+                color: '#202124',
+                margin: '12px 0',
               }}
             >
-              <div style={{ fontSize: '13px', color: '#147D78', fontWeight: 600, textTransform: 'uppercase' }}>
-                Compression Gain
-              </div>
-              <div
-                style={{
-                  fontSize: '40px',
-                  fontWeight: 700,
-                  color: '#147D78',
-                  letterSpacing: '-0.02em',
-                  marginTop: '2px',
-                }}
-              >
-                25.33% fewer bits
-              </div>
+              <span style={{ fontStyle: 'italic' }}>H(X)</span> = &minus;&sum; (<span style={{ fontStyle: 'italic' }}>p<sub>i</sub></span> &times; log<sub>2</sub> <span style={{ fontStyle: 'italic' }}>p<sub>i</sub></span>)
             </div>
-
-            <div style={{ fontSize: '13px', color: '#888888', marginTop: '8px' }}>
-              Achieved solely by adjusting codeword lengths to symbol probability distribution.
+            <div style={{ fontSize: '24px', color: '#555555', marginTop: '14px', lineHeight: 1.4 }}>
+              Defines the absolute information-theoretic lower bound on lossless compression.
             </div>
           </div>
         </div>
 
-        {/* Small Technical Caption */}
+        {/* Central Focal Point: Shannon-Huffman Fundamental Bound */}
         <div
           style={{
-            fontSize: '13px',
-            color: '#777777',
-            fontStyle: 'italic',
+            padding: '28px 36px',
+            backgroundColor: '#F3F9F9',
+            border: '3px solid #147D78',
             textAlign: 'center',
-            borderTop: '1px solid #EEEEEE',
-            paddingTop: '14px',
-            width: '100%',
+            margin: '20px 0',
+            opacity: step >= 2 ? 1 : 0.3,
+            transform: step >= 2 ? 'scale(1)' : 'scale(0.98)',
+            transition: 'all 0.4s ease',
           }}
         >
-          "Payload comparison; tree/code-table metadata is excluded. This represents an illustrative six-symbol academic derivation."
+          <div style={{ fontSize: '22px', fontWeight: 700, color: '#147D78', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+            Fundamental Theoretical Bound
+          </div>
+          <div
+            style={{
+              fontSize: '56px',
+              fontFamily: "'Crimson Pro', 'Latin Modern Math', 'Lora', serif",
+              fontWeight: 800,
+              color: '#202124',
+              letterSpacing: '0.04em',
+            }}
+          >
+            <span style={{ fontStyle: 'italic' }}>H(X)</span> &le; <span style={{ fontStyle: 'italic', color: '#147D78' }}>L̄</span> &lt; <span style={{ fontStyle: 'italic' }}>H(X)</span> + 1
+          </div>
+          <div style={{ fontSize: '24px', color: '#444444', marginTop: '8px' }}>
+            Huffman Coding achieves an average codeword length within 1 bit of theoretical source entropy.
+          </div>
+        </div>
+
+        {/* Bottom Quantitative Verification: 6-Symbol Example */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '40px',
+            padding: '24px 32px',
+            backgroundColor: '#FFFFFF',
+            border: '2px solid #E2E2E2',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ fontSize: '20px', fontWeight: 700, color: '#777777', textTransform: 'uppercase' }}>
+              Empirical 6-Symbol Distribution (100 Symbols Total)
+            </div>
+            <div style={{ fontSize: '26px', fontFamily: 'monospace', color: '#202124', marginTop: '6px' }}>
+              A(0.45), B(0.13), C(0.12), D(0.16), E(0.09), F(0.05)
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ textAlign: 'center', padding: '0 20px' }}>
+              <div style={{ fontSize: '18px', color: '#777777', fontWeight: 600 }}>Entropy Lower Bound</div>
+              <div style={{ fontSize: '38px', fontWeight: 800, fontFamily: 'monospace', color: '#202124' }}>
+                H(X) &approx; 2.22
+              </div>
+              <div style={{ fontSize: '18px', color: '#888888' }}>bits / symbol</div>
+            </div>
+
+            <div style={{ fontSize: '36px', color: '#147D78', fontWeight: 700 }}>&le;</div>
+
+            <div style={{ textAlign: 'center', padding: '0 20px', backgroundColor: '#E6F4F3', borderRadius: '4px', border: '1px solid #147D78' }}>
+              <div style={{ fontSize: '18px', color: '#147D78', fontWeight: 700 }}>Huffman Code Length</div>
+              <div style={{ fontSize: '38px', fontWeight: 800, fontFamily: 'monospace', color: '#147D78' }}>
+                L̄ = 2.24
+              </div>
+              <div style={{ fontSize: '18px', color: '#147D78', fontWeight: 600 }}>bits / symbol</div>
+            </div>
+
+            <div style={{ fontSize: '36px', color: '#777777', fontWeight: 700 }}>&lt;</div>
+
+            <div style={{ textAlign: 'center', padding: '0 20px' }}>
+              <div style={{ fontSize: '18px', color: '#777777', fontWeight: 600 }}>Upper Bound</div>
+              <div style={{ fontSize: '38px', fontWeight: 800, fontFamily: 'monospace', color: '#666666' }}>
+                3.22
+              </div>
+              <div style={{ fontSize: '18px', color: '#888888' }}>bits / symbol</div>
+            </div>
+          </div>
         </div>
       </div>
     </SlideLayout>

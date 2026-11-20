@@ -1,7 +1,11 @@
 import React from 'react';
 import { SlideLayout } from '../SlideLayout';
 
-export const Slide03PNG: React.FC = () => {
+interface Slide03PNGProps {
+  step?: number;
+}
+
+export const Slide03PNG: React.FC<Slide03PNGProps> = ({ step = 0 }) => {
   return (
     <SlideLayout
       slideNumber={3}
@@ -12,81 +16,84 @@ export const Slide03PNG: React.FC = () => {
         style={{
           display: 'grid',
           gridTemplateColumns: '1.1fr 0.9fr',
-          gap: '64px',
+          gap: '80px',
           height: '100%',
           alignItems: 'center',
         }}
       >
         {/* Left Column: Conceptual & Contextual Explanation */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '26px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           <div>
             <div
               style={{
-                fontSize: '14px',
+                fontSize: '24px',
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 color: '#147D78',
                 letterSpacing: '0.06em',
-                marginBottom: '8px',
+                marginBottom: '10px',
               }}
             >
               Industry Standard Context
             </div>
             <div
               style={{
-                fontSize: '22px',
-                lineHeight: 1.5,
+                fontSize: '34px',
+                lineHeight: 1.45,
                 color: '#202124',
-                fontWeight: 500,
+                fontWeight: 600,
               }}
             >
-              Portable Network Graphics (PNG) is the dominant lossless image standard across the World Wide Web, designed specifically to replace GIF and uncompressed raster formats.
+              Portable Network Graphics (PNG) is the foundational lossless image standard across the World Wide Web.
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
             <div
               style={{
-                padding: '18px 22px',
-                border: '1px solid #E2E2E2',
+                padding: '24px 28px',
+                border: '2px solid #E2E2E2',
                 backgroundColor: '#FAFAFA',
               }}
             >
-              <div style={{ fontWeight: 600, fontSize: '17px', color: '#202124', marginBottom: '6px' }}>
+              <div style={{ fontWeight: 700, fontSize: '26px', color: '#202124', marginBottom: '8px' }}>
                 Lossless Guarantee
               </div>
-              <div style={{ fontSize: '16px', color: '#555555', lineHeight: 1.5 }}>
-                PNG preserves exact 24-bit RGB and 32-bit RGBA color definitions. Every individual pixel rasterized at decoding matches the source raster byte-for-byte.
+              <div style={{ fontSize: '30px', color: '#444444', lineHeight: 1.4 }}>
+                PNG preserves exact 24-bit RGB and 32-bit RGBA color definitions byte-for-byte.
               </div>
             </div>
 
             <div
               style={{
-                padding: '18px 22px',
-                border: '1px solid #E2E2E2',
+                padding: '24px 28px',
+                border: '2px solid #E2E2E2',
                 backgroundColor: '#FAFAFA',
               }}
             >
-              <div style={{ fontWeight: 600, fontSize: '17px', color: '#202124', marginBottom: '6px' }}>
+              <div style={{ fontWeight: 700, fontSize: '26px', color: '#202124', marginBottom: '8px' }}>
                 The DEFLATE Architecture
               </div>
-              <div style={{ fontSize: '16px', color: '#555555', lineHeight: 1.5 }}>
-                PNG relies on the DEFLATE compression algorithm (RFC 1951). DEFLATE combines dictionary-based substitution with entropy encoding.
+              <div style={{ fontSize: '30px', color: '#444444', lineHeight: 1.4 }}>
+                PNG relies on DEFLATE (RFC 1951), coupling dictionary substitution with entropy coding.
               </div>
             </div>
 
             <div
               style={{
-                padding: '18px 22px',
-                border: '1px solid #147D78',
+                padding: '24px 28px',
+                border: '3px solid #147D78',
                 backgroundColor: '#F3F9F9',
+                opacity: step >= 1 ? 1 : 0.4,
+                transform: step >= 1 ? 'scale(1.02)' : 'scale(1)',
+                transition: 'all 0.4s ease',
               }}
             >
-              <div style={{ fontWeight: 600, fontSize: '17px', color: '#147D78', marginBottom: '6px' }}>
-                Scope of Our Exploration: The Greedy Core
+              <div style={{ fontWeight: 700, fontSize: '28px', color: '#147D78', marginBottom: '8px' }}>
+                Our Focus: The Greedy Core
               </div>
-              <div style={{ fontSize: '16px', color: '#333333', lineHeight: 1.5 }}>
-                Our investigation specifically isolates the <strong>Huffman Coding</strong> stage of this pipeline. We study how greedy tree construction assigns optimal prefix-free codes to symbol frequencies.
+              <div style={{ fontSize: '30px', color: '#202124', lineHeight: 1.4 }}>
+                We specifically isolate the <strong>Huffman Coding</strong> stage to analyze its greedy prefix-free tree construction.
               </div>
             </div>
           </div>
@@ -104,95 +111,95 @@ export const Slide03PNG: React.FC = () => {
           <div
             style={{
               width: '100%',
-              maxWidth: '480px',
+              maxWidth: '560px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '12px',
+              gap: '16px',
             }}
           >
-            {/* Box 1: PNG IMAGE DATA */}
-            <div
-              style={{
-                width: '100%',
-                padding: '20px 24px',
-                border: '1px solid #CCCCCC',
-                backgroundColor: '#FFFFFF',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: '16px', fontWeight: 600, color: '#202124', letterSpacing: '0.04em' }}>
-                PNG IMAGE DATA
-              </div>
-              <div style={{ fontSize: '13px', color: '#777777', marginTop: '4px' }}>
-                Source RGB / RGBA Pixel Stream
-              </div>
-            </div>
-
-            <div style={{ fontSize: '20px', color: '#777777', lineHeight: 1 }}>↓</div>
-
-            {/* Box 2: DEFLATE COMPRESSION */}
-            <div
-              style={{
-                width: '100%',
-                padding: '20px 24px',
-                border: '1px solid #CCCCCC',
-                backgroundColor: '#F8F9FA',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: '16px', fontWeight: 600, color: '#202124', letterSpacing: '0.04em' }}>
-                DEFLATE COMPRESSION
-              </div>
-              <div style={{ fontSize: '13px', color: '#777777', marginTop: '4px' }}>
-                Standard Compression Pipeline (RFC 1951)
-              </div>
-            </div>
-
-            <div style={{ fontSize: '20px', color: '#147D78', lineHeight: 1, fontWeight: 700 }}>↓</div>
-
-            {/* Box 3: HUFFMAN CODING (HIGHLIGHTED IN TEAL) */}
+            {/* Box 1 */}
             <div
               style={{
                 width: '100%',
                 padding: '24px 28px',
-                border: '2px solid #147D78',
+                border: '2px solid #202124',
+                backgroundColor: '#FFFFFF',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '26px', fontWeight: 700, color: '#202124', letterSpacing: '0.04em' }}>
+                PNG IMAGE DATA
+              </div>
+              <div style={{ fontSize: '20px', color: '#666666', marginTop: '6px' }}>
+                Decoded Uncompressed RGBA Raster
+              </div>
+            </div>
+
+            <div style={{ fontSize: '32px', color: '#777777', lineHeight: 1, fontWeight: 700 }}>&darr;</div>
+
+            {/* Box 2 */}
+            <div
+              style={{
+                width: '100%',
+                padding: '24px 28px',
+                border: '2px solid #CCCCCC',
+                backgroundColor: '#F8F9FA',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '26px', fontWeight: 700, color: '#202124', letterSpacing: '0.04em' }}>
+                DEFLATE COMPRESSION
+              </div>
+              <div style={{ fontSize: '20px', color: '#666666', marginTop: '6px' }}>
+                Standard Pipeline (RFC 1951)
+              </div>
+            </div>
+
+            <div style={{ fontSize: '36px', color: '#147D78', lineHeight: 1, fontWeight: 800 }}>&darr;</div>
+
+            {/* Box 3: HUFFMAN CODING HIGHLIGHT */}
+            <div
+              style={{
+                width: '100%',
+                padding: '28px 32px',
+                border: '4px solid #147D78',
                 backgroundColor: '#F0F9F8',
                 textAlign: 'center',
-                boxShadow: '0 2px 8px rgba(20, 125, 120, 0.1)',
+                boxShadow: '0 4px 16px rgba(20, 125, 120, 0.15)',
               }}
             >
               <div
                 style={{
-                  fontSize: '19px',
-                  fontWeight: 700,
+                  fontSize: '32px',
+                  fontWeight: 800,
                   color: '#147D78',
                   letterSpacing: '0.05em',
                 }}
               >
                 HUFFMAN CODING
               </div>
-              <div style={{ fontSize: '13px', color: '#147D78', marginTop: '6px', fontWeight: 500 }}>
+              <div style={{ fontSize: '22px', color: '#147D78', marginTop: '8px', fontWeight: 600 }}>
                 Greedy Prefix-Free Binary Tree Construction [OUR FOCUS]
               </div>
             </div>
 
-            <div style={{ fontSize: '20px', color: '#777777', lineHeight: 1 }}>↓</div>
+            <div style={{ fontSize: '32px', color: '#777777', lineHeight: 1, fontWeight: 700 }}>&darr;</div>
 
-            {/* Box 4: BINARY REPRESENTATION */}
+            {/* Box 4 */}
             <div
               style={{
                 width: '100%',
-                padding: '20px 24px',
-                border: '1px solid #CCCCCC',
+                padding: '24px 28px',
+                border: '2px solid #202124',
                 backgroundColor: '#FFFFFF',
                 textAlign: 'center',
               }}
             >
-              <div style={{ fontSize: '16px', fontWeight: 600, color: '#202124', letterSpacing: '0.04em' }}>
+              <div style={{ fontSize: '26px', fontWeight: 700, color: '#202124', letterSpacing: '0.04em' }}>
                 BINARY REPRESENTATION
               </div>
-              <div style={{ fontSize: '13px', color: '#777777', marginTop: '4px' }}>
+              <div style={{ fontSize: '20px', color: '#666666', marginTop: '6px' }}>
                 Packed Bitstream Payload
               </div>
             </div>
@@ -200,15 +207,15 @@ export const Slide03PNG: React.FC = () => {
 
           <div
             style={{
-              marginTop: '28px',
-              maxWidth: '520px',
-              fontSize: '12.5px',
-              color: '#777777',
+              marginTop: '36px',
+              maxWidth: '600px',
+              fontSize: '22px',
+              color: '#555555',
               fontStyle: 'italic',
-              lineHeight: 1.5,
+              lineHeight: 1.45,
               textAlign: 'center',
-              borderTop: '1px solid #EEEEEE',
-              paddingTop: '12px',
+              borderTop: '2px solid #EEEEEE',
+              paddingTop: '16px',
             }}
           >
             "Huffman coding is one component of PNG's DEFLATE compression method; this presentation focuses specifically on its greedy tree-construction algorithm."

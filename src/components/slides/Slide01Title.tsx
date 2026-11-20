@@ -1,7 +1,11 @@
 import React from 'react';
 import { UniversityLogo } from '../UniversityLogo';
 
-export const Slide01Title: React.FC = () => {
+interface Slide01TitleProps {
+  step?: number;
+}
+
+export const Slide01Title: React.FC<Slide01TitleProps> = () => {
   return (
     <div
       style={{
@@ -12,52 +16,53 @@ export const Slide01Title: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: '70px 120px 80px 120px',
+        padding: '80px 140px',
         boxSizing: 'border-box',
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
-      {/* Top Academic Context */}
+      {/* Top Section: Course Name & Square Emblem in a balanced academic header */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontSize: '15px',
-          color: '#777777',
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase',
-          fontWeight: 500,
-          borderBottom: '1px solid #ECECEC',
-          paddingBottom: '16px',
+          borderBottom: '2px solid #EBEBEB',
+          paddingBottom: '28px',
         }}
       >
-        <span>Analysis of Algorithms</span>
-        <span>Course Presentation — Fall 2026</span>
+        <div
+          style={{
+            fontSize: '30px',
+            fontWeight: 600,
+            color: '#147D78',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Analysis of Algorithms
+        </div>
+        <UniversityLogo size={120} />
       </div>
 
-      {/* Main Title & Subtitle block */}
+      {/* Center Section: Main Title & Subtitle */}
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          maxWidth: '1400px',
-          margin: '0 auto',
+          alignItems: 'flex-start',
+          maxWidth: '1500px',
+          margin: '30px 0',
         }}
       >
-        {/* Horizontal University Title Logo Space */}
-        <UniversityLogo />
-
         <h1
           style={{
-            fontSize: '56px',
+            fontSize: '64px',
             fontWeight: 700,
             lineHeight: 1.15,
             letterSpacing: '-0.03em',
             color: '#202124',
-            margin: '0 0 20px 0',
+            margin: '0 0 24px 0',
           }}
         >
           Think Small: How Greedy Algorithms Compress Images
@@ -65,11 +70,12 @@ export const Slide01Title: React.FC = () => {
 
         <div
           style={{
-            fontSize: '26px',
+            fontSize: '36px',
             color: '#147D78',
             fontWeight: 500,
+            lineHeight: 1.3,
             letterSpacing: '-0.01em',
-            marginBottom: '36px',
+            marginBottom: '32px',
           }}
         >
           Huffman Coding and Lossless Image Compression
@@ -77,50 +83,59 @@ export const Slide01Title: React.FC = () => {
 
         <div
           style={{
-            width: '120px',
-            height: '2px',
+            width: '140px',
+            height: '4px',
             backgroundColor: '#147D78',
-            marginBottom: '36px',
           }}
         />
-
-        <div
-          style={{
-            fontSize: '18px',
-            color: '#555555',
-            lineHeight: 1.6,
-            maxWidth: '850px',
-          }}
-        >
-          An algorithmic exploration of optimal prefix-free codes, greedy tree construction,
-          and lossless image raster compression.
-        </div>
       </div>
 
-      {/* Bottom Academic Metadata */}
+      {/* Bottom Section: Presenter Names in clean academic layout */}
       <div
         style={{
-          borderTop: '1px solid #ECECEC',
-          paddingTop: '24px',
+          borderTop: '2px solid #EBEBEB',
+          paddingTop: '32px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-end',
-          fontSize: '16px',
-          color: '#666666',
         }}
       >
         <div>
-          <div style={{ fontWeight: 600, color: '#202124', marginBottom: '4px' }}>
-            Nanjing University of Posts and Telecommunications
+          <div
+            style={{
+              fontSize: '22px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              color: '#777777',
+              fontWeight: 600,
+              marginBottom: '10px',
+            }}
+          >
+            Presenters
           </div>
-          <div>School of Computer Science &amp; Technology</div>
+          <div
+            style={{
+              display: 'flex',
+              gap: '40px',
+              fontSize: '30px',
+              fontWeight: 600,
+              color: '#202124',
+            }}
+          >
+            <span>Bahaeddine EL ATIGUI</span>
+            <span style={{ color: '#CCCCCC' }}>|</span>
+            <span>Hafssa Gammaz</span>
+          </div>
         </div>
 
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontWeight: 500, color: '#202124', marginBottom: '4px' }}>
-            Course: Analysis of Algorithms
-          </div>
-          <div>November 2026</div>
+        <div
+          style={{
+            fontSize: '24px',
+            color: '#777777',
+            fontWeight: 500,
+          }}
+        >
+          Fall 2026
         </div>
       </div>
     </div>

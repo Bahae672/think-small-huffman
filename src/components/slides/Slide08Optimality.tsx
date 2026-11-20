@@ -1,12 +1,16 @@
 import React from 'react';
 import { SlideLayout } from '../SlideLayout';
 
-export const Slide08Optimality: React.FC = () => {
+interface Slide08OptimalityProps {
+  step?: number;
+}
+
+export const Slide08Optimality: React.FC<Slide08OptimalityProps> = ({ step = 0 }) => {
   return (
     <SlideLayout
       slideNumber={8}
       title="Why Does the Greedy Algorithm Work?"
-      subtitle="Mathematical Proof Structure of Global Optimality"
+      subtitle="Mathematical Proof Structure of Global Optimality (CLRS Theorems 16.3 &amp; 16.4)"
     >
       <div
         style={{
@@ -14,209 +18,218 @@ export const Slide08Optimality: React.FC = () => {
           flexDirection: 'column',
           height: '100%',
           justifyContent: 'space-between',
-          padding: '10px 20px',
+          padding: '10px 10px',
         }}
       >
-        <div style={{ fontSize: '18px', color: '#555555', lineHeight: 1.5 }}>
-          A greedy algorithm does not guarantee a globally optimal solution in arbitrary combinatorial spaces.
-          For Huffman Coding, the global optimality of the greedy strategy is mathematically established through three rigorous lemmas:
+        <div style={{ fontSize: '30px', color: '#333333', lineHeight: 1.45 }}>
+          In combinatorial optimization, greedy heuristics often get trapped in local minima. For Huffman Coding, global optimality is guaranteed by three structural lemmas:
         </div>
 
-        {/* 3 Academic Argument Panels */}
+        {/* 3 Large Academic Argument Panels */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr 1fr',
-            gap: '32px',
-            margin: '20px 0',
+            gap: '36px',
+            margin: '24px 0',
           }}
         >
           {/* 01: Greedy-Choice Property */}
           <div
             style={{
-              padding: '28px 24px',
+              padding: '36px 30px',
               backgroundColor: '#FAFAFA',
-              border: '1px solid #E2E2E2',
+              border: '2px solid #E2E2E2',
+              borderTop: '6px solid #147D78',
               display: 'flex',
               flexDirection: 'column',
+              opacity: step >= 0 ? 1 : 0.35,
+              transition: 'opacity 0.3s ease',
             }}
           >
             <div
               style={{
-                fontSize: '15px',
-                fontWeight: 700,
+                fontSize: '22px',
+                fontWeight: 800,
                 color: '#147D78',
-                letterSpacing: '0.05em',
-                marginBottom: '12px',
+                letterSpacing: '0.06em',
+                marginBottom: '16px',
               }}
             >
-              01 — GREEDY-CHOICE PROPERTY
+              01 — GREEDY CHOICE
             </div>
             <div
               style={{
-                fontSize: '19px',
-                fontWeight: 600,
+                fontSize: '28px',
+                fontWeight: 700,
                 color: '#202124',
-                lineHeight: 1.4,
-                marginBottom: '14px',
+                lineHeight: 1.35,
+                marginBottom: '16px',
               }}
             >
-              Sibling Leaves at Maximum Depth
+              Deepest Sibling Leaves
             </div>
             <div
               style={{
-                fontSize: '15.5px',
-                color: '#555555',
-                lineHeight: 1.6,
+                fontSize: '24px',
+                color: '#444444',
+                lineHeight: 1.55,
                 flex: 1,
               }}
             >
-              Let <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>C</span> be an alphabet in which each character has a defined frequency.
-              Let <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>x</span> and <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>y</span> be two characters with the lowest frequencies.
-              Then there exists an optimal prefix-code tree for <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>C</span> in which <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>x</span> and <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>y</span> are sibling leaves of maximum depth.
+              There always exists an optimal prefix code tree in which the two characters with the lowest frequencies appear as sibling leaves of maximum depth.
             </div>
             <div
               style={{
-                marginTop: '16px',
-                paddingTop: '12px',
-                borderTop: '1px solid #EBEBEB',
-                fontSize: '13px',
+                marginTop: '20px',
+                paddingTop: '16px',
+                borderTop: '1px solid #E0E0E0',
+                fontSize: '20px',
                 color: '#777777',
+                fontStyle: 'italic',
               }}
             >
-              Proved via exchange argument (swapping lowest-frequency nodes to the deepest leaves strictly decreases or maintains total cost).
+              Proved via exchange argument: swapping lowest frequencies to maximum depth cannot increase tree cost.
             </div>
           </div>
 
           {/* 02: Reduction */}
           <div
             style={{
-              padding: '28px 24px',
+              padding: '36px 30px',
               backgroundColor: '#FAFAFA',
-              border: '1px solid #E2E2E2',
+              border: '2px solid #E2E2E2',
+              borderTop: '6px solid #202124',
               display: 'flex',
               flexDirection: 'column',
+              opacity: step >= 1 ? 1 : 0.35,
+              transform: step >= 1 ? 'translateY(0)' : 'translateY(10px)',
+              transition: 'all 0.3s ease',
             }}
           >
             <div
               style={{
-                fontSize: '15px',
-                fontWeight: 700,
-                color: '#147D78',
-                letterSpacing: '0.05em',
-                marginBottom: '12px',
+                fontSize: '22px',
+                fontWeight: 800,
+                color: '#202124',
+                letterSpacing: '0.06em',
+                marginBottom: '16px',
               }}
             >
               02 — REDUCTION
             </div>
             <div
               style={{
-                fontSize: '19px',
-                fontWeight: 600,
+                fontSize: '28px',
+                fontWeight: 700,
                 color: '#202124',
-                lineHeight: 1.4,
-                marginBottom: '14px',
+                lineHeight: 1.35,
+                marginBottom: '16px',
               }}
             >
               Problem Space Contraction
             </div>
             <div
               style={{
-                fontSize: '15.5px',
-                color: '#555555',
-                lineHeight: 1.6,
+                fontSize: '24px',
+                color: '#444444',
+                lineHeight: 1.55,
                 flex: 1,
               }}
             >
-              When symbols <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>x</span> and <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>y</span> are merged into a composite symbol <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>z</span> with frequency <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>z.freq = x.freq + y.freq</span>, the alphabet is reduced from <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>n</span> to <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>n &minus; 1</span> symbols:
-              <br /><br />
-              <span style={{ fontFamily: 'serif', fontStyle: 'italic', fontSize: '17px' }}>C' = (C &minus; &#123;x, y&#125;) &cup; &#123;z&#125;</span>
+              Combining two symbols <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>x</span> and <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>y</span> into a single node <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>z</span> creates a smaller instance of the exact same optimization problem on <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>n − 1</span> symbols.
             </div>
             <div
               style={{
-                marginTop: '16px',
-                paddingTop: '12px',
-                borderTop: '1px solid #EBEBEB',
-                fontSize: '13px',
+                marginTop: '20px',
+                paddingTop: '16px',
+                borderTop: '1px solid #E0E0E0',
+                fontSize: '20px',
                 color: '#777777',
+                fontFamily: 'monospace',
               }}
             >
-              The cost of tree <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>T</span> relates to <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>T'</span> by: <span style={{ fontFamily: 'monospace' }}>Cost(T) = Cost(T') + x.freq + y.freq</span>.
+              Cost(T) = Cost(T') + x.freq + y.freq
             </div>
           </div>
 
           {/* 03: Optimal Substructure */}
           <div
             style={{
-              padding: '28px 24px',
+              padding: '36px 30px',
               backgroundColor: '#FAFAFA',
-              border: '1px solid #E2E2E2',
+              border: '2px solid #E2E2E2',
+              borderTop: '6px solid #147D78',
               display: 'flex',
               flexDirection: 'column',
+              opacity: step >= 2 ? 1 : 0.35,
+              transform: step >= 2 ? 'translateY(0)' : 'translateY(10px)',
+              transition: 'all 0.3s ease',
             }}
           >
             <div
               style={{
-                fontSize: '15px',
-                fontWeight: 700,
+                fontSize: '22px',
+                fontWeight: 800,
                 color: '#147D78',
-                letterSpacing: '0.05em',
-                marginBottom: '12px',
+                letterSpacing: '0.06em',
+                marginBottom: '16px',
               }}
             >
               03 — OPTIMAL SUBSTRUCTURE
             </div>
             <div
               style={{
-                fontSize: '19px',
-                fontWeight: 600,
+                fontSize: '28px',
+                fontWeight: 700,
                 color: '#202124',
-                lineHeight: 1.4,
-                marginBottom: '14px',
+                lineHeight: 1.35,
+                marginBottom: '16px',
               }}
             >
-              Inductive Extension to Origin
+              Inductive Extension
             </div>
             <div
               style={{
-                fontSize: '15.5px',
-                color: '#555555',
-                lineHeight: 1.6,
+                fontSize: '24px',
+                color: '#444444',
+                lineHeight: 1.55,
                 flex: 1,
               }}
             >
-              An optimal solution to the reduced alphabet <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>C'</span> can be converted into an optimal solution for the original alphabet <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>C</span> simply by replacing the leaf node <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>z</span> with an internal node having <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>x</span> and <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>y</span> as children.
+              An optimal solution to the reduced alphabet <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>C'</span> converts into an optimal solution for the original alphabet <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>C</span> by replacing <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>z</span> with children <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>x</span> and <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>y</span>.
             </div>
             <div
               style={{
-                marginTop: '16px',
-                paddingTop: '12px',
-                borderTop: '1px solid #EBEBEB',
-                fontSize: '13px',
+                marginTop: '20px',
+                paddingTop: '16px',
+                borderTop: '1px solid #E0E0E0',
+                fontSize: '20px',
                 color: '#777777',
+                fontStyle: 'italic',
               }}
             >
-              Proved by induction on <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>n</span>: each local greedy merge preserves global optimality.
+              Induction on n establishes that the greedy choice remains globally optimal.
             </div>
           </div>
         </div>
 
-        {/* Bottom Bold Statement */}
+        {/* Bottom Banner */}
         <div
           style={{
-            borderLeft: '5px solid #147D78',
-            padding: '16px 24px',
-            backgroundColor: '#F3F9F8',
+            borderLeft: '8px solid #147D78',
+            padding: '24px 36px',
+            backgroundColor: '#F3F9F9',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}
         >
-          <div style={{ fontSize: '22px', fontWeight: 700, color: '#147D78' }}>
+          <div style={{ fontSize: '36px', fontWeight: 700, color: '#147D78' }}>
             Result: An optimal prefix-free binary code.
           </div>
-          <div style={{ fontSize: '15px', color: '#555555' }}>
-            Theorem (Huffman, 1952): Algorithm 1 produces an optimal prefix code tree.
+          <div style={{ fontSize: '24px', color: '#555555' }}>
+            Theorem (Huffman, 1952)
           </div>
         </div>
       </div>

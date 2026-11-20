@@ -26,21 +26,21 @@ export const SpeakerNotesDrawer: React.FC<SpeakerNotesDrawerProps> = ({
         top: 0,
         right: 0,
         bottom: 0,
-        width: '460px',
+        width: '520px',
         backgroundColor: '#FFFFFF',
-        boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
+        boxShadow: '-6px 0 30px rgba(0,0,0,0.2)',
         zIndex: 99999,
         display: 'flex',
         flexDirection: 'column',
         fontFamily: "'Inter', sans-serif",
-        borderLeft: '1px solid #D5D5D5',
+        borderLeft: '2px solid #147D78',
       }}
     >
       {/* Header */}
       <div
         style={{
-          padding: '16px 20px',
-          borderBottom: '1px solid #E5E5E5',
+          padding: '20px 24px',
+          borderBottom: '2px solid #E5E5E5',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -48,23 +48,23 @@ export const SpeakerNotesDrawer: React.FC<SpeakerNotesDrawerProps> = ({
         }}
       >
         <div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#147D78', textTransform: 'uppercase' }}>
-            Presenter Speaker Notes
+          <div style={{ fontSize: '15px', fontWeight: 700, color: '#147D78', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Presenter Lecture Script
           </div>
-          <div style={{ fontSize: '16px', fontWeight: 700, color: '#202124', marginTop: '2px' }}>
-            Slide {currentSlide} of 12
+          <div style={{ fontSize: '20px', fontWeight: 800, color: '#202124', marginTop: '2px' }}>
+            Slide {currentSlide} of 11
           </div>
         </div>
         <button
           type="button"
           onClick={onClose}
           style={{
-            padding: '4px 10px',
-            fontSize: '13px',
+            padding: '6px 14px',
+            fontSize: '14px',
             backgroundColor: '#FFFFFF',
-            border: '1px solid #CCCCCC',
+            border: '2px solid #CCCCCC',
             cursor: 'pointer',
-            fontWeight: 600,
+            fontWeight: 700,
           }}
         >
           Close [S]
@@ -74,37 +74,37 @@ export const SpeakerNotesDrawer: React.FC<SpeakerNotesDrawerProps> = ({
       {/* Target speaking duration */}
       <div
         style={{
-          padding: '12px 20px',
+          padding: '14px 24px',
           backgroundColor: '#F4FAF9',
           borderBottom: '1px solid #E0EFEF',
           display: 'flex',
           justifyContent: 'space-between',
-          fontSize: '13.5px',
+          fontSize: '16px',
         }}
       >
         <span>
-          Slide Target Time: <strong>{currentNote?.durationMinutes}</strong> ({currentNote?.durationSeconds}s)
+          Target Duration: <strong>{currentNote?.durationMinutes}</strong> ({currentNote?.durationSeconds}s)
         </span>
-        <span style={{ color: '#147D78', fontWeight: 600 }}>Total Course: ~15 mins</span>
+        <span style={{ color: '#147D78', fontWeight: 700 }}>Total: ~15 mins</span>
       </div>
 
       {/* Note Script Content */}
       <div
         style={{
           flex: 1,
-          padding: '24px 20px',
+          padding: '28px 24px',
           overflowY: 'auto',
-          fontSize: '15px',
+          fontSize: '18px',
           lineHeight: 1.7,
           color: '#333333',
         }}
       >
-        <div style={{ fontWeight: 600, fontSize: '17px', color: '#202124', marginBottom: '14px' }}>
+        <div style={{ fontWeight: 800, fontSize: '22px', color: '#202124', marginBottom: '18px' }}>
           {currentNote?.slideTitle}
         </div>
 
         {currentNote?.notes.map((paragraph, idx) => (
-          <p key={idx} style={{ marginBottom: '16px' }}>
+          <p key={idx} style={{ marginBottom: '18px' }}>
             {paragraph}
           </p>
         ))}
@@ -113,36 +113,33 @@ export const SpeakerNotesDrawer: React.FC<SpeakerNotesDrawerProps> = ({
       {/* Slide Quick Jump Navigation */}
       <div
         style={{
-          padding: '16px 20px',
-          borderTop: '1px solid #E5E5E5',
+          padding: '20px 24px',
+          borderTop: '2px solid #E5E5E5',
           backgroundColor: '#FAFAFA',
         }}
       >
-        <div style={{ fontSize: '12px', color: '#777777', textTransform: 'uppercase', fontWeight: 600, marginBottom: '8px' }}>
-          Slide Navigation Jump
+        <div style={{ fontSize: '14px', color: '#777777', textTransform: 'uppercase', fontWeight: 700, marginBottom: '10px' }}>
+          Slide Navigation Matrix (1–11)
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '6px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px' }}>
           {speakerNotesData.map((s) => (
             <button
               key={s.slideNumber}
               type="button"
               onClick={() => onJumpToSlide(s.slideNumber)}
               style={{
-                padding: '6px 0',
-                fontSize: '12px',
-                fontWeight: currentSlide === s.slideNumber ? 700 : 500,
+                padding: '8px 0',
+                fontSize: '15px',
+                fontWeight: currentSlide === s.slideNumber ? 800 : 600,
                 backgroundColor: currentSlide === s.slideNumber ? '#147D78' : '#FFFFFF',
                 color: currentSlide === s.slideNumber ? '#FFFFFF' : '#202124',
-                border: '1px solid #CCCCCC',
+                border: '2px solid #CCCCCC',
                 cursor: 'pointer',
               }}
             >
               {s.slideNumber}
             </button>
           ))}
-        </div>
-        <div style={{ fontSize: '11px', color: '#888888', marginTop: '10px', textAlign: 'center' }}>
-          Shortcuts: [Space / &rarr;] Next &bull; [&larr;] Prev &bull; [S] Notes &bull; [F] Fullscreen
         </div>
       </div>
     </div>
