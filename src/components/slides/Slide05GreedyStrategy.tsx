@@ -1,11 +1,11 @@
 import React from 'react';
 import { SlideLayout } from '../SlideLayout';
 
-interface Slide04GreedyStrategyProps {
+interface Slide05GreedyStrategyProps {
   step?: number;
 }
 
-export const Slide04GreedyStrategy: React.FC<Slide04GreedyStrategyProps> = ({ step = 0 }) => {
+export const Slide05GreedyStrategy: React.FC<Slide05GreedyStrategyProps> = ({ step = 0 }) => {
   const symbols = [
     { symbol: 'A', freq: 45, isMin: false },
     { symbol: 'B', freq: 13, isMin: false },
@@ -17,7 +17,8 @@ export const Slide04GreedyStrategy: React.FC<Slide04GreedyStrategyProps> = ({ st
 
   return (
     <SlideLayout
-      slideNumber={4}
+      slideNumber={5}
+      totalSlides={14}
       title="The Greedy Choice"
       subtitle="Local Selection Rule for Optimal Prefix Codes"
     >
@@ -137,7 +138,7 @@ export const Slide04GreedyStrategy: React.FC<Slide04GreedyStrategyProps> = ({ st
                 backgroundColor: '#FAFAFA',
                 border: '2px solid #E0E0E0',
                 borderLeft: '6px solid #147D78',
-                opacity: step >= 1 ? 1 : 0.3,
+                opacity: step >= 1 ? 1 : 0.85,
                 transition: 'opacity 0.4s ease',
               }}
             >
@@ -220,7 +221,7 @@ export const Slide04GreedyStrategy: React.FC<Slide04GreedyStrategyProps> = ({ st
             color: '#333333',
           }}
         >
-          "How can we assign variable-length prefix-free binary codes to minimize the total encoding cost?"
+          &ldquo;How can we assign variable-length prefix-free binary codes to minimize the total encoding cost?&rdquo;
         </div>
       </div>
     </SlideLayout>

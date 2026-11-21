@@ -7,23 +7,34 @@ export const speakerNotesData: SpeakerNote[] = [
     durationMinutes: "0:30",
     durationSeconds: 30,
     notes: [
-      "Good morning everyone. We are Bahaeddine EL ATIGUI and Hafssa Gammaz, presenting 'Think Small: How Greedy Algorithms Compress Images — Huffman Coding and Lossless Image Compression' for our Analysis of Algorithms course.",
+      "Good morning everyone. We are Bahaeddine EL ATIGUI and Hafssa GAMMAZ, presenting 'Think Small: How Greedy Algorithms Compress Images — Huffman Coding and Lossless Image Compression' for our Analysis of Algorithms course.",
       "In computer science, representing data compactly without loss of information is fundamental. Today, we will explore how a greedy algorithmic strategy solves this optimization problem by building an optimal prefix-free code, and we will demonstrate its direct application to image raster data."
     ]
   },
   {
     slideNumber: 2,
-    slideTitle: "The Problem: Efficient Image Storage",
-    durationMinutes: "1:05",
-    durationSeconds: 65,
+    slideTitle: "The Growing Cost of Digital Images",
+    durationMinutes: "0:50",
+    durationSeconds: 50,
     notes: [
-      "Let us begin with the motivating problem. Consider a digital university platform or research repository hosting millions of graphical assets: logos, diagrams, icons, and technical screenshots.",
-      "Transmitting and archiving these uncompressed raster assets consumes massive storage and network bandwidth. However, for academic diagrams, typography, and logos, lossy compression is unacceptable—text becomes blurry and high-contrast edges introduce severe artifacts.",
-      "The fundamental algorithmic challenge is: How can we represent identical raster image information using fewer bits, without discarding a single byte of the original data? This brings us to entropy-based lossless compression."
+      "Consider a digital university platform or research repository hosting thousands of graphical assets: institutional emblems, lecture diagrams, technical code screenshots, and UI icons.",
+      "As visual data accumulates, raw uncompressed byte payloads strain network bandwidth and storage infrastructure. Uncompressed 24-bit RGB frames quickly consume megabytes per asset.",
+      "Crucially, in educational diagrams and typography, lossy artifacts blur text and ruin sharp edges. We need a compression technique that reduces storage while guaranteeing 100% data fidelity."
     ]
   },
   {
     slideNumber: 3,
+    slideTitle: "The Fundamental Question: Lossless Data Reduction",
+    durationMinutes: "0:45",
+    durationSeconds: 45,
+    notes: [
+      "This leads directly to our central algorithmic question: 'Can we reduce the amount of data while preserving every original pixel?'",
+      "Notice the lossless pipeline: Original Image into Compression into Reconstructed Image, where Original identically equals Reconstructed pixel for pixel.",
+      "Lossless compression achieves this by exploiting statistical redundancy in symbol frequencies rather than discarding perceptual data."
+    ]
+  },
+  {
+    slideNumber: 4,
     slideTitle: "Huffman Coding in PNG",
     durationMinutes: "0:55",
     durationSeconds: 55,
@@ -34,7 +45,7 @@ export const speakerNotesData: SpeakerNote[] = [
     ]
   },
   {
-    slideNumber: 4,
+    slideNumber: 5,
     slideTitle: "The Greedy Choice",
     durationMinutes: "1:15",
     durationSeconds: 75,
@@ -42,11 +53,11 @@ export const speakerNotesData: SpeakerNote[] = [
       "Greedy algorithms solve optimization problems by making a sequence of choices, each of which looks best at the moment, with the hope that local optimization leads to a global optimum.",
       "In Huffman Coding, our central greedy decision is remarkably simple: Repeatedly combine the two symbols with the lowest frequencies.",
       "Look at the six-symbol distribution on screen: A through F with frequencies ranging from 5 to 45. The greedy choice inspects the set, extracts the two minimum frequencies—here F with frequency 5 and E with frequency 9—and fuses them into a composite node of frequency 14.",
-      "This composite node is reinserted, and the process repeats. Why does this local choice guarantee a minimal total weighted path length? We will formulate this mathematically."
+      "This composite node is reinserted into the priority queue, and the process repeats. Why does this local choice guarantee a minimal total weighted path length? We will formulate this mathematically."
     ]
   },
   {
-    slideNumber: 5,
+    slideNumber: 6,
     slideTitle: "Algorithm 1 — Huffman(C)",
     durationMinutes: "1:15",
     durationSeconds: 75,
@@ -59,12 +70,12 @@ export const speakerNotesData: SpeakerNote[] = [
     ]
   },
   {
-    slideNumber: 6,
+    slideNumber: 7,
     slideTitle: "Constructing the Huffman Tree",
-    durationMinutes: "1:25",
-    durationSeconds: 85,
+    durationMinutes: "1:30",
+    durationSeconds: 90,
     notes: [
-      "Notice that we begin at STEP 0 with all six independent frequency nodes in priority queue Q: A(45), B(13), C(12), D(16), E(9), and F(5). No connections exist yet.",
+      "Notice that we begin at STEP 0 with all six independent frequency nodes in priority queue Q: F(5), E(9), C(12), B(13), D(16), and A(45).",
       "In Merge 1, F(5) and E(9) are extracted and combined into parent node 14.",
       "In Merge 2, the next two smallest are C(12) and B(13), forming parent node 25.",
       "In Merge 3, node 14 and symbol D(16) combine to form node 30.",
@@ -74,19 +85,19 @@ export const speakerNotesData: SpeakerNote[] = [
     ]
   },
   {
-    slideNumber: 7,
-    slideTitle: "Theoretical Optimality & Shannon Entropy",
-    durationMinutes: "1:15",
-    durationSeconds: 75,
+    slideNumber: 8,
+    slideTitle: "Mathematical Formulation",
+    durationMinutes: "1:00",
+    durationSeconds: 60,
     notes: [
-      "How close is Huffman Coding to theoretical optimality? We evaluate two core metrics: average codeword length L_bar, and Shannon source entropy H(X).",
-      "Shannon entropy establishes the fundamental lower bound on lossless compression: no prefix-free code can achieve an average length below H(X).",
-      "The fundamental theorem guarantees that H(X) <= L_bar < H(X) + 1.",
-      "For our six-symbol distribution, Shannon entropy is approximately 2.22 bits per symbol, and Huffman achieves an average codeword length of exactly 2.24 bits per symbol—just 0.02 bits from the theoretical absolute limit!"
+      "Here is the foundational mathematical formulation of Huffman Coding.",
+      "The equation defines L_bar_Huffman as the minimum achievable average codeword length, taken over all possible binary prefix codes, calculated as the sum of p_i times l_i for each of the k distinct symbols.",
+      "p_i represents the probability of symbol i, l_i represents the length in bits of its assigned codeword, and k is the total alphabet size.",
+      "Huffman's greedy strategy provably finds this minimum without needing an exhaustive search."
     ]
   },
   {
-    slideNumber: 8,
+    slideNumber: 9,
     slideTitle: "Why Does the Greedy Algorithm Work?",
     durationMinutes: "1:05",
     durationSeconds: 65,
@@ -98,41 +109,63 @@ export const speakerNotesData: SpeakerNote[] = [
     ]
   },
   {
-    slideNumber: 9,
-    slideTitle: "Computational Complexity",
-    durationMinutes: "1:20",
-    durationSeconds: 80,
-    notes: [
-      "Now we analyze computational complexity. Let N be total raster bytes, and k be distinct symbols (k <= 256).",
-      "Counting frequencies takes O(N) time. Priority queue initialization takes O(k) time.",
-      "Tree construction executes k minus 1 iterations, each with two EXTRACT-MIN and one INSERT operation in a binary heap, bounding construction to O(k log k).",
-      "Notice the graph on the right: at k=256, a min-priority queue takes roughly 2,048 operations, whereas an unoptimized repeated array scan takes 65,536 operations—a 32-fold asymptotic efficiency gain!",
-      "The total time is O(N + k log k), requiring O(k) auxiliary space."
-    ]
-  },
-  {
     slideNumber: 10,
-    slideTitle: "Interactive Live Demonstration",
-    durationMinutes: "3:50",
-    durationSeconds: 230,
+    slideTitle: "Huffman Coding vs. Alternative Approaches",
+    durationMinutes: "1:25",
+    durationSeconds: 85,
     notes: [
-      "We now arrive at the interactive live demonstration. This operates directly on full-resolution raster pixel data inside the browser.",
-      "When an image is loaded, it preserves 100% of its original intrinsic dimensions without downsampling.",
-      "The demonstration automatically visualizes the complete pipeline: from raw image, to enlarged pixel grid, to numerical RGBA bytes, to empirical 256-bin histogram, to greedy tree construction, to prefix-free encoding, and finally to decoded raster reconstruction.",
-      "We perform an exact byte-by-byte verification across all decoded bytes: Exact Reconstruction: PASS.",
-      "Finally, the metrics evaluate original payload versus Huffman payload and net compression gains."
+      "To verify why the greedy bottom-up approach is superior, we compare it against alternative schemes on an integer distribution: A with count 5, and B, C, D, E each with count 2 (Total N = 13).",
+      "Fixed-Length encoding assigns a uniform 3 bits to every symbol (39 total bits), yielding 3.00 bits per symbol with zero entropy reduction.",
+      "Shannon-Fano coding uses top-down partitioning. Splitting into equal halves {A,B}=7 vs {C,D,E}=6 forces symbol A into 2 bits, requiring 30 total bits and 2.31 bits per symbol.",
+      "Huffman Coding builds bottom-up using the greedy choice: fusing D+E=4, B+C=4, 4+4=8, and finally A(5)+8=13. Symbol A sits at depth 1 (1 bit), requiring only 29 total bits (2.23 bits per symbol).",
+      "As shown in the bar graph, Huffman Coding achieves the minimum average code length among binary prefix-free codes."
     ]
   },
   {
     slideNumber: 11,
-    slideTitle: "Conclusion",
-    durationMinutes: "0:45",
-    durationSeconds: 45,
+    slideTitle: "Computational Complexity: Big-O Analysis",
+    durationMinutes: "1:10",
+    durationSeconds: 70,
     notes: [
-      "To conclude: We started with the real-world problem of storing and transmitting image data without loss.",
-      "We applied the greedy strategy of repeatedly combining the two least frequent symbols to construct a Huffman binary tree.",
-      "The resulting prefix-free code achieves the minimum expected codeword length for the empirical symbol distribution, tightly bounded by Shannon entropy.",
-      "This exemplifies the core elegance of greedy algorithms: locally optimal decisions yielding a mathematically verified, globally optimal encoding. Thank you for your attention."
+      "Now we analyze computational complexity. Let N be total raster bytes, and k be distinct alphabet symbols (k <= 256 for byte channels).",
+      "Building the frequency histogram takes linear time O(N) over the image pixels.",
+      "Initializing the min-heap via Build-Min-Heap takes O(k) time.",
+      "The greedy tree construction loop runs k - 1 times. Each iteration executes two Extract-Min operations and one Insert operation in O(log k) time, yielding O(k log k) total tree construction time.",
+      "Because N >> k in image compression (millions of pixels vs 256 symbols), the overall runtime O(N + k log k) is dominated by the linear scan, with minimal auxiliary space O(k)."
+    ]
+  },
+  {
+    slideNumber: 12,
+    slideTitle: "Why Use a Priority Queue?",
+    durationMinutes: "1:00",
+    durationSeconds: 60,
+    notes: [
+      "Why must we use a min-priority queue instead of an array?",
+      "If we implemented the greedy choice using an unsorted array, finding the two minimums in each iteration would require a linear scan of size k, leading to quadratic time O(k²).",
+      "For a byte alphabet where k = 256, naive repeated scanning requires 65,536 operations, whereas a binary min-heap requires only 2,048 operations—a 32-fold performance increase!",
+      "A priority queue reduces Huffman tree construction from O(k²) to O(k log k)."
+    ]
+  },
+  {
+    slideNumber: 13,
+    slideTitle: "Live Demonstration: Huffman Image Compression",
+    durationMinutes: "3:00",
+    durationSeconds: 180,
+    notes: [
+      "We now arrive at the live demonstration, structured as one continuous visual story on a single slide.",
+      "The audience sees the image progressively transform through its natural forms: the image breaks into visible pixels; the pixels become numerical byte values; the values organize into symbol frequencies; the greedy algorithm repeatedly combines the two lowest frequencies into a Huffman tree; the tree emits packed binary bits; and the bits stream back to reconstruct the original image.",
+      "Notice the side-by-side verification at the end: exact byte-for-byte lossless match, with zero information lost."
+    ]
+  },
+  {
+    slideNumber: 14,
+    slideTitle: "Thank You",
+    durationMinutes: "0:30",
+    durationSeconds: 30,
+    notes: [
+      "Thank you very much for your time and attention.",
+      "'Small choices can lead to optimal solutions.'",
+      "We now welcome any questions or discussion on greedy algorithm design, Huffman tree proofs, or lossless image compression."
     ]
   }
 ];

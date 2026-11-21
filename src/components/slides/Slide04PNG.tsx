@@ -1,14 +1,15 @@
 import React from 'react';
 import { SlideLayout } from '../SlideLayout';
 
-interface Slide03PNGProps {
+interface Slide04PNGProps {
   step?: number;
 }
 
-export const Slide03PNG: React.FC<Slide03PNGProps> = ({ step = 0 }) => {
+export const Slide04PNG: React.FC<Slide04PNGProps> = ({ step = 0 }) => {
   return (
     <SlideLayout
-      slideNumber={3}
+      slideNumber={4}
+      totalSlides={14}
       title="Huffman Coding in PNG"
       subtitle="Architectural Context within the Lossless Pipeline"
     >
@@ -84,7 +85,7 @@ export const Slide03PNG: React.FC<Slide03PNGProps> = ({ step = 0 }) => {
                 padding: '24px 28px',
                 border: '3px solid #147D78',
                 backgroundColor: '#F3F9F9',
-                opacity: step >= 1 ? 1 : 0.4,
+                opacity: step >= 1 ? 1 : 0.85,
                 transform: step >= 1 ? 'scale(1.02)' : 'scale(1)',
                 transition: 'all 0.4s ease',
               }}
@@ -203,22 +204,6 @@ export const Slide03PNG: React.FC<Slide03PNGProps> = ({ step = 0 }) => {
                 Packed Bitstream Payload
               </div>
             </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: '36px',
-              maxWidth: '600px',
-              fontSize: '22px',
-              color: '#555555',
-              fontStyle: 'italic',
-              lineHeight: 1.45,
-              textAlign: 'center',
-              borderTop: '2px solid #EEEEEE',
-              paddingTop: '16px',
-            }}
-          >
-            "Huffman coding is one component of PNG's DEFLATE compression method; this presentation focuses specifically on its greedy tree-construction algorithm."
           </div>
         </div>
       </div>

@@ -6,16 +6,16 @@ interface SlideLayoutProps {
   title?: string;
   subtitle?: string;
   children: React.ReactNode;
-  hideHeaderFooter?: boolean;
+  hideHeader?: boolean;
 }
 
 export const SlideLayout: React.FC<SlideLayoutProps> = ({
   slideNumber,
-  totalSlides = 11,
+  totalSlides = 14,
   title,
   subtitle,
   children,
-  hideHeaderFooter = false,
+  hideHeader = false,
 }) => {
   return (
     <div
@@ -27,14 +27,14 @@ export const SlideLayout: React.FC<SlideLayoutProps> = ({
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        padding: '56px 100px 48px 100px',
+        padding: '56px 100px 56px 100px',
         boxSizing: 'border-box',
         overflow: 'hidden',
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
-      {/* Top Academic Course Header & Slide Counter */}
-      {!hideHeaderFooter && (
+      {/* Top Academic Course Header & Slide Counter (Only header kept, NO footer) */}
+      {!hideHeader && (
         <div
           style={{
             display: 'flex',
@@ -104,25 +104,6 @@ export const SlideLayout: React.FC<SlideLayoutProps> = ({
       >
         {children}
       </div>
-
-      {/* Restrained Academic Footer with Large Readable Caption */}
-      {!hideHeaderFooter && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            fontSize: '20px',
-            color: '#888888',
-            marginTop: '16px',
-            paddingTop: '12px',
-            borderTop: '1px solid #EBEBEB',
-          }}
-        >
-          <span>Think Small: How Greedy Algorithms Compress Images</span>
-          <span>Bahaeddine EL ATIGUI &bull; Hafssa Gammaz</span>
-        </div>
-      )}
     </div>
   );
 };

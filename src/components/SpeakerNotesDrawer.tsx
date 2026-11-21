@@ -52,7 +52,7 @@ export const SpeakerNotesDrawer: React.FC<SpeakerNotesDrawerProps> = ({
             Presenter Lecture Script
           </div>
           <div style={{ fontSize: '20px', fontWeight: 800, color: '#202124', marginTop: '2px' }}>
-            Slide {currentSlide} of 11
+            Slide {currentSlide} of {speakerNotesData.length}
           </div>
         </div>
         <button

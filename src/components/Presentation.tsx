@@ -1,38 +1,71 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Slide01Title } from './slides/Slide01Title';
 import { Slide02Problem } from './slides/Slide02Problem';
-import { Slide03PNG } from './slides/Slide03PNG';
-import { Slide04GreedyStrategy } from './slides/Slide04GreedyStrategy';
-import { Slide05Pseudocode } from './slides/Slide05Pseudocode';
-import { Slide06TreeConstruction } from './slides/Slide06TreeConstruction';
-import { Slide07MathematicalFormulation } from './slides/Slide07MathematicalFormulation';
-import { Slide08Optimality } from './slides/Slide08Optimality';
-import { Slide09Complexity } from './slides/Slide09Complexity';
-import { Slide10InteractiveDemo } from './slides/Slide10InteractiveDemo';
-import { Slide11Conclusion } from './slides/Slide11Conclusion';
+import { Slide03FundamentalQuestion } from './slides/Slide03FundamentalQuestion';
+import { Slide04PNG } from './slides/Slide04PNG';
+import { Slide05GreedyStrategy } from './slides/Slide05GreedyStrategy';
+import { Slide06Pseudocode } from './slides/Slide06Pseudocode';
+import { Slide07TreeConstruction } from './slides/Slide07TreeConstruction';
+import { Slide08MathematicalFormulation } from './slides/Slide08MathematicalFormulation';
+import { Slide09Optimality } from './slides/Slide09Optimality';
+import { Slide10Comparison } from './slides/Slide10Comparison';
+import { Slide11ComplexityBigO } from './slides/Slide11ComplexityBigO';
+import { Slide12ComplexityGraph } from './slides/Slide12ComplexityGraph';
+import { Slide13InteractiveDemo } from './slides/Slide13InteractiveDemo';
+import { Slide14ThankYou } from './slides/Slide14ThankYou';
 import { SpeakerNotesDrawer } from './SpeakerNotesDrawer';
 
 // Max animation steps per slide (0-indexed)
 const MAX_STEPS: { [slideNumber: number]: number } = {
   1: 0,
-  2: 1,
-  3: 1,
+  2: 0,
+  3: 0,
   4: 1,
-  5: 2,
-  6: 6, // Step 0 (Initial 6 nodes) through Step 6 (Codes table)
-  7: 2,
-  8: 2,
-  9: 2,
-  10: 0, // Autonomous continuous 8-stage image transformation
-  11: 1,
+  5: 1,
+  6: 2,
+  7: 5, // Step 0 (Initial 6 nodes) through Step 5 (Final root & codes)
+  8: 0, // Single boxed equation + 4 formal definitions
+  9: 2, // 3 proof cards (0, 1, 2)
+  10: 4, // Step 0: Input -> Step 1: Fixed -> Step 2: Shannon-Fano -> Step 3: Huffman -> Step 4: Comparison chart
+  11: 2, // Step 0: Operations table -> Step 1: Total Time -> Step 2: Auxiliary Space
+  12: 1, // Step 0: Base comparative graph -> Step 1: 32x callout bracket
+  13: 0, // Autonomous continuous fluid metamorphosis on one slide
+  14: 0, // Thank You
 };
+
+// Inject global keyframes once at module level
+const GLOBAL_CSS = `
+  @keyframes slideEntrance {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+`;
+
+if (typeof document !== 'undefined' && !document.getElementById('agy-anim-css')) {
+  const style = document.createElement('style');
+  style.id = 'agy-anim-css';
+  style.textContent = GLOBAL_CSS;
+  document.head.appendChild(style);
+}
 
 export const Presentation: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState<number>(1);
   const [slideStep, setSlideStep] = useState<number>(0);
   const [scale, setScale] = useState<number>(1);
   const [showNotes, setShowNotes] = useState<boolean>(false);
-  const totalSlides = 11;
+  const totalSlides = 14;
 
   // Viewport scaling for 1920 x 1080 logical resolution
   useEffect(() => {
@@ -81,7 +114,6 @@ export const Presentation: React.FC = () => {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't intercept when typing in text inputs or file dialogs
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement ||
@@ -140,23 +172,29 @@ export const Presentation: React.FC = () => {
       case 2:
         return <Slide02Problem step={slideStep} />;
       case 3:
-        return <Slide03PNG step={slideStep} />;
+        return <Slide03FundamentalQuestion step={slideStep} />;
       case 4:
-        return <Slide04GreedyStrategy step={slideStep} />;
+        return <Slide04PNG step={slideStep} />;
       case 5:
-        return <Slide05Pseudocode step={slideStep} />;
+        return <Slide05GreedyStrategy step={slideStep} />;
       case 6:
-        return <Slide06TreeConstruction step={slideStep} />;
+        return <Slide06Pseudocode step={slideStep} />;
       case 7:
-        return <Slide07MathematicalFormulation step={slideStep} />;
+        return <Slide07TreeConstruction step={slideStep} />;
       case 8:
-        return <Slide08Optimality step={slideStep} />;
+        return <Slide08MathematicalFormulation step={slideStep} />;
       case 9:
-        return <Slide09Complexity step={slideStep} />;
+        return <Slide09Optimality step={slideStep} />;
       case 10:
-        return <Slide10InteractiveDemo />;
+        return <Slide10Comparison step={slideStep} />;
       case 11:
-        return <Slide11Conclusion step={slideStep} />;
+        return <Slide11ComplexityBigO step={slideStep} />;
+      case 12:
+        return <Slide12ComplexityGraph step={slideStep} />;
+      case 13:
+        return <Slide13InteractiveDemo step={slideStep} onStepChange={setSlideStep} />;
+      case 14:
+        return <Slide14ThankYou step={slideStep} />;
       default:
         return <Slide01Title step={slideStep} />;
     }
@@ -186,13 +224,23 @@ export const Presentation: React.FC = () => {
           boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
           backgroundColor: '#FFFFFF',
           position: 'relative',
+          overflow: 'hidden',
           cursor: currentSlide < totalSlides || slideStep < (MAX_STEPS[currentSlide] || 0) ? 'pointer' : 'default',
         }}
       >
-        {renderSlideContent()}
+        <div
+          key={`slide-${currentSlide}`}
+          style={{
+            width: '100%',
+            height: '100%',
+            animation: 'slideEntrance 0.35s cubic-bezier(0.22, 1, 0.36, 1) both',
+          }}
+        >
+          {renderSlideContent()}
+        </div>
       </div>
 
-      {/* Speaker Notes Drawer (Zero visible control bars on screen, toggled via 'S' or 'N' key) */}
+      {/* Speaker Notes Drawer (Toggled via 'S' or 'N' key) */}
       <SpeakerNotesDrawer
         currentSlide={currentSlide}
         isOpen={showNotes}

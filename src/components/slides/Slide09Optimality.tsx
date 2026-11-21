@@ -1,14 +1,15 @@
 import React from 'react';
 import { SlideLayout } from '../SlideLayout';
 
-interface Slide08OptimalityProps {
+interface Slide09OptimalityProps {
   step?: number;
 }
 
-export const Slide08Optimality: React.FC<Slide08OptimalityProps> = ({ step = 0 }) => {
+export const Slide09Optimality: React.FC<Slide09OptimalityProps> = ({ step = 0 }) => {
   return (
     <SlideLayout
-      slideNumber={8}
+      slideNumber={9}
+      totalSlides={14}
       title="Why Does the Greedy Algorithm Work?"
       subtitle="Mathematical Proof Structure of Global Optimality (CLRS Theorems 16.3 &amp; 16.4)"
     >
@@ -102,7 +103,7 @@ export const Slide08Optimality: React.FC<Slide08OptimalityProps> = ({ step = 0 }
               borderTop: '6px solid #202124',
               display: 'flex',
               flexDirection: 'column',
-              opacity: step >= 1 ? 1 : 0.35,
+              opacity: step >= 1 ? 1 : 0.85,
               transform: step >= 1 ? 'translateY(0)' : 'translateY(10px)',
               transition: 'all 0.3s ease',
             }}
@@ -149,7 +150,7 @@ export const Slide08Optimality: React.FC<Slide08OptimalityProps> = ({ step = 0 }
                 fontFamily: 'monospace',
               }}
             >
-              Cost(T) = Cost(T') + x.freq + y.freq
+              Cost(T) = Cost(T&apos;) + x.freq + y.freq
             </div>
           </div>
 
@@ -162,7 +163,7 @@ export const Slide08Optimality: React.FC<Slide08OptimalityProps> = ({ step = 0 }
               borderTop: '6px solid #147D78',
               display: 'flex',
               flexDirection: 'column',
-              opacity: step >= 2 ? 1 : 0.35,
+              opacity: step >= 2 ? 1 : 0.85,
               transform: step >= 2 ? 'translateY(0)' : 'translateY(10px)',
               transition: 'all 0.3s ease',
             }}
@@ -197,7 +198,7 @@ export const Slide08Optimality: React.FC<Slide08OptimalityProps> = ({ step = 0 }
                 flex: 1,
               }}
             >
-              An optimal solution to the reduced alphabet <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>C'</span> converts into an optimal solution for the original alphabet <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>C</span> by replacing <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>z</span> with children <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>x</span> and <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>y</span>.
+              An optimal solution to the reduced alphabet <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>C&apos;</span> converts into an optimal solution for the original alphabet <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>C</span> by replacing <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>z</span> with children <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>x</span> and <span style={{ fontStyle: 'italic', fontFamily: 'serif' }}>y</span>.
             </div>
             <div
               style={{

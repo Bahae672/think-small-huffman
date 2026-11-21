@@ -1,14 +1,15 @@
 import React from 'react';
 import { SlideLayout } from '../SlideLayout';
 
-interface Slide05PseudocodeProps {
+interface Slide06PseudocodeProps {
   step?: number;
 }
 
-export const Slide05Pseudocode: React.FC<Slide05PseudocodeProps> = ({ step = 0 }) => {
+export const Slide06Pseudocode: React.FC<Slide06PseudocodeProps> = ({ step = 0 }) => {
   return (
     <SlideLayout
-      slideNumber={5}
+      slideNumber={6}
+      totalSlides={14}
       title="Algorithm 1 — Huffman(C)"
       subtitle="Formal Academic Specification (Cormen et al., CLRS)"
     >
