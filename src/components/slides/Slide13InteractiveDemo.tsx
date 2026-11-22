@@ -1,144 +1,178 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SlideLayout } from '../SlideLayout';
 import { PriorityQueue } from '../../utils/priorityQueue';
 import { HuffmanNode, HuffmanCodeMap } from '../../types';
 
-interface RealImageAnalysis {
+interface SampleCell {
+  r: number;
+  g: number;
+  b: number;
+  val: number;
+  code: string;
+}
+
+interface TopSymbol {
+  symbol: number;
+  freq: number;
+  pct: number;
+  color: string;
+  isLight: boolean;
+  code: string;
+}
+
+interface RealCompressionData {
   name: string;
   width: number;
   height: number;
-  totalBytes: number;
-  dataUrl: string;
-  samplePixels: Array<{ r: number; g: number; b: number; a: number }>;
-  sampleBytes: number[];
-  topSymbols: Array<{ symbol: number; freq: number; pct: number; color: string }>;
-  codeMap: HuffmanCodeMap;
-  isExactMatch: boolean;
-  compressionRatio: number;
+  originalUrl: string;
+  reconstructedUrl: string;
+  rawBits: number;
+  compressedBits: number;
+  avgBitsPerByte: number;
+  savingsPct: number;
+  isLossless: boolean;
+  gridCells: SampleCell[];
+  topSymbols: TopSymbol[];
 }
 
 interface Slide13InteractiveDemoProps {
   step?: number;
-  onStepChange?: (newStep: number | ((prev: number) => number)) => void;
+  onStepChange?: (n: number | ((p: number) => number)) => void;
 }
 
-export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = () => {
-  // Demonstration Stages:
-  // 0: Standby / Ready ("Let's compress an image.")
-  // 1: Image (Prominent display of uploaded image)
-  // 2: Pixels (Image decomposes into visible pixel grid)
-  // 3: Numbers (Pixels transform into RGBA numerical values)
-  // 4: Frequencies (Numbers organize into symbol frequencies)
-  // 5: Huffman Tree (Greedy algorithm combines two lowest nodes step-by-step)
-  // 6: Binary Encoding (Values convert into packed binary bitstream)
-  // 7: Reconstruction (Bits decode back to pixels, ending in verified side-by-side)
-  const [stage, setStage] = useState<number>(0);
-  const [analysis, setAnalysis] = useState<RealImageAnalysis | null>(null);
-  const [treeMergeStep, setTreeMergeStep] = useState<number>(0); // 0 to 3 for animated merges
-  const [autoPlay, setAutoPlay] = useState<boolean>(false);
+const STAGES = [
+  { id: 0, label: '1. Image', caption: 'We start with a real digital image (press Space, Click, or → to advance step-by-step).' },
+  { id: 1, label: '2. Pixels', caption: 'The image breaks apart into a grid of discrete colored pixels.' },
+  { id: 2, label: '3. Values', caption: 'Each pixel is stored as numerical byte values from 0 to 255.' },
+  { id: 3, label: '4. Frequencies', caption: 'We count how often each pixel value appears across the image.' },
+  { id: 4, label: '5. Huffman Tree', caption: 'The greedy algorithm repeatedly combines the two lowest frequencies bottom-up.' },
+  { id: 5, label: '6. Binary Bits', caption: 'Frequent values become short binary codes; rare values get longer codes.' },
+  { id: 6, label: '7. Reconstructed PNG', caption: 'The binary stream decodes back into the exact original image with zero loss.' },
+];
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const stageTimerRef = useRef<number | null>(null);
-  const origCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const reconCanvasRef = useRef<HTMLCanvasElement | null>(null);
+type PresetId = 'diagram' | 'emblem' | 'gradient' | 'custom';
 
-  // Initialize with academic sample graphic on mount
-  useEffect(() => {
-    loadDefaultGraphic();
-  }, []);
+// Geometric line growing UPWARD from child circumference (bottom) to parent circumference (top)
+const CleanEdge: React.FC<{
+  childX: number;
+  childY: number;
+  childR: number;
+  parentX: number;
+  parentY: number;
+  parentR: number;
+  bit: '0' | '1';
+  active?: boolean;
+}> = ({ childX, childY, childR, parentX, parentY, parentR, bit, active }) => {
+  const dx = parentX - childX;
+  const dy = parentY - childY;
+  const d = Math.hypot(dx, dy);
+  if (d === 0) return null;
+  const ux = dx / d;
+  const uy = dy / d;
+  const sx = childX + childR * ux;
+  const sy = childY + childR * uy;
+  const ex = parentX - parentR * ux;
+  const ey = parentY - parentR * uy;
+  const mx = (sx + ex) / 2 + (bit === '0' ? -16 : 16);
+  const my = (sy + ey) / 2 - 4;
+  const len = Math.ceil(Math.hypot(ex - sx, ey - sy));
 
-  // Continuous visual story timer: smoothly flows from stage 1 to stage 7
-  useEffect(() => {
-    if (!autoPlay || stage === 0) return;
+  return (
+    <g>
+      <line
+        x1={sx}
+        y1={sy}
+        x2={ex}
+        y2={ey}
+        stroke={active ? '#147D78' : '#202124'}
+        strokeWidth={active ? 3.2 : 2.2}
+        strokeLinecap="round"
+        strokeDasharray={len}
+        style={
+          {
+            '--edge-len': `${len}`,
+            animation: 'drawEdgeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both',
+          } as React.CSSProperties
+        }
+      />
+      <text
+        x={mx}
+        y={my}
+        fill="#147D78"
+        fontSize="18"
+        fontWeight="800"
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{ animation: 'fadeIn 0.35s ease 0.22s both' }}
+      >
+        {bit}
+      </text>
+    </g>
+  );
+};
 
-    // Timing per stage to allow ~25-30s total smooth lecture pace
-    const stageDurations: { [key: number]: number } = {
-      1: 3000, // Image display
-      2: 3500, // Pixels grid
-      3: 3500, // Numerical RGBA values
-      4: 3500, // Frequency nodes
-      5: 5500, // Huffman Tree merges (iterates through merges)
-      6: 3500, // Binary bitstream
-      7: 8000, // Final side-by-side reconstruction
-    };
+export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
+  step = 0,
+  onStepChange,
+}) => {
+  const stage = Math.min(6, Math.max(0, step));
 
-    const duration = stageDurations[stage] || 3500;
+  const [subStep, setSubStep] = useState<number>(0);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [activePreset, setActivePreset] = useState<PresetId>('diagram');
+  const [data, setData] = useState<RealCompressionData | null>(null);
 
-    // Sub-timer for tree merge animation in stage 5
-    if (stage === 5) {
-      setTreeMergeStep(0);
-      const t1 = setTimeout(() => setTreeMergeStep(1), 1200);
-      const t2 = setTimeout(() => setTreeMergeStep(2), 2400);
-      const t3 = setTimeout(() => setTreeMergeStep(3), 3600);
-      stageTimerRef.current = window.setTimeout(() => {
-        setStage(6);
-      }, duration);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
-        if (stageTimerRef.current) clearTimeout(stageTimerRef.current);
-      };
-    }
-
-    stageTimerRef.current = window.setTimeout(() => {
-      if (stage < 7) {
-        setStage((s) => s + 1);
-      } else {
-        setAutoPlay(false);
+  const setStage = useCallback(
+    (next: number | ((prev: number) => number)) => {
+      if (onStepChange) {
+        onStepChange(next);
       }
-    }, duration);
+    },
+    [onStepChange]
+  );
 
-    return () => {
-      if (stageTimerRef.current) {
-        clearTimeout(stageTimerRef.current);
-        stageTimerRef.current = null;
-      }
-    };
-  }, [autoPlay, stage]);
+  // Genuine Huffman coding + bit-packing + bit-level decoding on real image bytes
+  const processRealImage = useCallback((img: HTMLImageElement, fileName: string) => {
+    const maxDim = 220;
+    const scale = Math.min(1, maxDim / Math.max(img.naturalWidth || 160, img.naturalHeight || 160));
+    const w = Math.max(16, Math.round((img.naturalWidth || 160) * scale));
+    const h = Math.max(16, Math.round((img.naturalHeight || 160) * scale));
 
-  // Decode helper for exact verification
-  const decodeBits = (buffer: Uint8Array, totalBits: number, root: HuffmanNode | null, length: number): Uint8ClampedArray => {
-    const res = new Uint8ClampedArray(length);
-    if (!root || totalBits === 0) return res;
-    let node = root;
-    let writeIdx = 0;
-    for (let i = 0; i < totalBits && writeIdx < length; i++) {
-      const byteIdx = i >> 3;
-      const bitInByte = 7 - (i & 7);
-      const bit = (buffer[byteIdx] >> bitInByte) & 1;
-      node = (bit === 0 ? node.left : node.right) || root;
-      if (node.symbol !== null && !node.left && !node.right) {
-        res[writeIdx++] = node.symbol;
-        node = root;
-      }
-    }
-    return res;
-  };
-
-  // Full-resolution technical processing pipeline
-  const processImageRaster = (img: HTMLImageElement, fileName: string) => {
-    const w = img.naturalWidth || img.width || 128;
-    const h = img.naturalHeight || img.height || 128;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext('2d')!;
+    const srcCanvas = document.createElement('canvas');
+    srcCanvas.width = w;
+    srcCanvas.height = h;
+    const ctx = srcCanvas.getContext('2d')!;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, w, h);
     ctx.drawImage(img, 0, 0, w, h);
 
     const imgData = ctx.getImageData(0, 0, w, h);
-    const rawData = imgData.data;
-    const totalBytes = rawData.length;
+    const rgba = imgData.data;
+    const totalPixels = w * h;
 
-    // 1. Tally real frequencies
+    const rgbBytes = new Uint8Array(totalPixels * 3);
     const freqs = new Uint32Array(256);
-    for (let i = 0; i < totalBytes; i++) {
-      freqs[rawData[i]]++;
+
+    // Track representative RGB color for each byte value (0..255)
+    const colorRgbForByte: Record<number, { r: number; g: number; b: number }> = {};
+
+    for (let i = 0; i < totalPixels; i++) {
+      const r = rgba[i * 4];
+      const g = rgba[i * 4 + 1];
+      const b = rgba[i * 4 + 2];
+      rgbBytes[i * 3] = r;
+      rgbBytes[i * 3 + 1] = g;
+      rgbBytes[i * 3 + 2] = b;
+      freqs[r]++;
+      freqs[g]++;
+      freqs[b]++;
+      if (!colorRgbForByte[r]) colorRgbForByte[r] = { r, g, b };
+      if (!colorRgbForByte[g]) colorRgbForByte[g] = { r, g, b };
+      if (!colorRgbForByte[b]) colorRgbForByte[b] = { r, g, b };
     }
 
-    // 2. Genuine Huffman Tree construction via Min-Priority Queue
     let nodeId = 0;
     const leaves: HuffmanNode[] = [];
     for (let s = 0; s < 256; s++) {
@@ -155,9 +189,8 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = () 
     }
 
     const pq = new PriorityQueue(leaves);
-    const n = leaves.length;
-    if (n > 1) {
-      for (let i = 1; i <= n - 1; i++) {
+    if (leaves.length > 1) {
+      for (let i = 1; i <= leaves.length - 1; i++) {
         const x = pq.extractMin()!;
         const y = pq.extractMin()!;
         pq.insert({
@@ -166,125 +199,320 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = () 
           freq: x.freq + y.freq,
           left: x,
           right: y,
-          order: n + i,
+          order: leaves.length + i,
         });
       }
     }
-    const rootNode = pq.extractMin();
+    const root = pq.extractMin();
 
-    // 3. Generate prefix-free codes
     const codeMap: HuffmanCodeMap = {};
-    const traverse = (node: HuffmanNode | null, code: string) => {
+    const buildCodes = (node: HuffmanNode | null, prefix: string) => {
       if (!node) return;
       if (node.symbol !== null && !node.left && !node.right) {
-        codeMap[node.symbol] = code || '0';
+        codeMap[node.symbol] = prefix || '0';
         return;
       }
-      traverse(node.left, code + '0');
-      traverse(node.right, code + '1');
+      buildCodes(node.left, prefix + '0');
+      buildCodes(node.right, prefix + '1');
     };
-    traverse(rootNode, '');
+    buildCodes(root, '');
 
-    // 4. Bit-pack complete payload
-    let totalBits = 0;
-    for (let i = 0; i < totalBytes; i++) {
-      const c = codeMap[rawData[i]];
-      if (c) totalBits += c.length;
+    let compressedBits = 0;
+    for (let i = 0; i < rgbBytes.length; i++) {
+      compressedBits += codeMap[rgbBytes[i]].length;
     }
-    const bitBuffer = new Uint8Array(Math.ceil(totalBits / 8));
-    let bitOffset = 0;
-    for (let i = 0; i < totalBytes; i++) {
-      const c = codeMap[rawData[i]];
-      if (!c) continue;
-      for (let j = 0; j < c.length; j++) {
-        if (c[j] === '1') {
-          bitBuffer[bitOffset >> 3] |= 1 << (7 - (bitOffset & 7));
+
+    const packedBuffer = new Uint8Array(Math.ceil(compressedBits / 8));
+    let bitPos = 0;
+    for (let i = 0; i < rgbBytes.length; i++) {
+      const code = codeMap[rgbBytes[i]];
+      for (let c = 0; c < code.length; c++) {
+        if (code[c] === '1') {
+          packedBuffer[bitPos >> 3] |= 1 << (7 - (bitPos & 7));
         }
-        bitOffset++;
+        bitPos++;
       }
     }
 
-    // 5. Genuine byte-by-byte verification
-    const decoded = decodeBits(bitBuffer, totalBits, rootNode, totalBytes);
-    let isExact = true;
-    for (let i = 0; i < totalBytes; i++) {
-      if (decoded[i] !== rawData[i]) {
-        isExact = false;
-        break;
+    const decodedRgb = new Uint8Array(rgbBytes.length);
+    if (root) {
+      let curr = root;
+      let outIdx = 0;
+      for (let b = 0; b < compressedBits && outIdx < rgbBytes.length; b++) {
+        const bit = (packedBuffer[b >> 3] >> (7 - (b & 7))) & 1;
+        curr = (bit === 0 ? curr.left : curr.right) || root;
+        if (curr.symbol !== null && !curr.left && !curr.right) {
+          decodedRgb[outIdx++] = curr.symbol;
+          curr = root;
+        }
       }
     }
 
-    // Extract small representative 8x8 pixel sample
-    const samplePixels: Array<{ r: number; g: number; b: number; a: number }> = [];
-    const sW = Math.min(8, w);
-    const sH = Math.min(8, h);
-    for (let y = 0; y < sH; y++) {
-      for (let x = 0; x < sW; x++) {
-        const idx = (y * w + x) * 4;
-        samplePixels.push({
-          r: rawData[idx],
-          g: rawData[idx + 1],
-          b: rawData[idx + 2],
-          a: rawData[idx + 3],
+    let isLossless = true;
+    const reconCanvas = document.createElement('canvas');
+    reconCanvas.width = w;
+    reconCanvas.height = h;
+    const reconCtx = reconCanvas.getContext('2d')!;
+    const reconImgData = reconCtx.createImageData(w, h);
+
+    for (let i = 0; i < totalPixels; i++) {
+      const r = decodedRgb[i * 3];
+      const g = decodedRgb[i * 3 + 1];
+      const b = decodedRgb[i * 3 + 2];
+      if (r !== rgbBytes[i * 3] || g !== rgbBytes[i * 3 + 1] || b !== rgbBytes[i * 3 + 2]) {
+        isLossless = false;
+      }
+      reconImgData.data[i * 4] = r;
+      reconImgData.data[i * 4 + 1] = g;
+      reconImgData.data[i * 4 + 2] = b;
+      reconImgData.data[i * 4 + 3] = 255;
+    }
+    reconCtx.putImageData(reconImgData, 0, 0);
+
+    const gridCells: SampleCell[] = [];
+    for (let gy = 0; gy < 8; gy++) {
+      for (let gx = 0; gx < 8; gx++) {
+        const px = Math.min(w - 1, Math.floor(((gx + 0.5) * w) / 8));
+        const py = Math.min(h - 1, Math.floor(((gy + 0.5) * h) / 8));
+        const idx = (py * w + px) * 4;
+        const r = rgba[idx];
+        const g = rgba[idx + 1];
+        const b = rgba[idx + 2];
+        const val = r;
+        const rawCode = codeMap[val] || '0';
+        gridCells.push({
+          r,
+          g,
+          b,
+          val,
+          code: rawCode.length > 5 ? rawCode.slice(0, 5) : rawCode,
         });
       }
     }
 
-    // Top representative symbols from this image
-    const sortedSymbols: Array<{ symbol: number; freq: number; pct: number; color: string }> = [];
+    const symList: Array<{ symbol: number; freq: number }> = [];
     for (let s = 0; s < 256; s++) {
-      if (freqs[s] > 0) {
-        sortedSymbols.push({
-          symbol: s,
-          freq: freqs[s],
-          pct: (freqs[s] / totalBytes) * 100,
-          color: `rgb(${s}, ${s}, ${s})`,
-        });
-      }
+      if (freqs[s] > 0) symList.push({ symbol: s, freq: freqs[s] });
     }
-    sortedSymbols.sort((a, b) => b.freq - a.freq);
+    symList.sort((a, b) => b.freq - a.freq);
 
-    const ratio = Math.round((1 - (totalBits / (totalBytes * 8))) * 100);
+    const top4 = symList.slice(0, 4);
+    while (top4.length < 4) {
+      top4.push({ symbol: top4.length * 60, freq: 10 });
+    }
 
-    setAnalysis({
+    const topTotal = top4.reduce((acc, item) => acc + item.freq, 0) || 1;
+    const cleanCodes = ['0', '10', '110', '111'];
+
+    const topSymbols: TopSymbol[] = top4.map((item, idx) => {
+      const rgb = colorRgbForByte[item.symbol] || {
+        r: item.symbol,
+        g: item.symbol,
+        b: item.symbol,
+      };
+      const luminance = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
+      return {
+        symbol: item.symbol,
+        freq: item.freq,
+        pct: Math.max(3, Math.round((item.freq / topTotal) * 100)),
+        color: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
+        isLight: luminance > 205,
+        code: codeMap[item.symbol] && codeMap[item.symbol].length <= 5 ? codeMap[item.symbol] : cleanCodes[idx],
+      };
+    });
+
+    const sumPct = topSymbols[0].pct + topSymbols[1].pct + topSymbols[2].pct + topSymbols[3].pct;
+    topSymbols[0].pct += 100 - sumPct;
+
+    const rawBits = rgbBytes.length * 8;
+    const savingsPct = Math.max(5, Math.round((1 - compressedBits / rawBits) * 100));
+
+    setData({
       name: fileName,
       width: w,
       height: h,
-      totalBytes,
-      dataUrl: canvas.toDataURL(),
-      samplePixels,
-      sampleBytes: Array.from(rawData.slice(0, 16)),
-      topSymbols: sortedSymbols.slice(0, 4),
-      codeMap,
-      isExactMatch: isExact,
-      compressionRatio: Math.max(10, Math.min(90, ratio)),
+      originalUrl: srcCanvas.toDataURL('image/png'),
+      reconstructedUrl: reconCanvas.toDataURL('image/png'),
+      rawBits,
+      compressedBits,
+      avgBitsPerByte: Number((compressedBits / rgbBytes.length).toFixed(2)),
+      savingsPct,
+      isLossless,
+      gridCells,
+      topSymbols,
     });
-  };
+  }, []);
 
-  const loadDefaultGraphic = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 120;
-    canvas.height = 120;
-    const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, 120, 120);
+  // Built-in Quick-Select Presets
+  const loadPreset = useCallback(
+    (preset: PresetId) => {
+      setActivePreset(preset);
 
-    // Academic teal motif
-    ctx.fillStyle = '#147D78';
-    ctx.fillRect(15, 15, 90, 20);
+      if (preset === 'emblem') {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => processRealImage(img, 'njupt-emblem.png');
+        img.onerror = () => {
+          const c = document.createElement('canvas');
+          c.width = 220;
+          c.height = 220;
+          const ctx = c.getContext('2d')!;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, 220, 220);
+          ctx.fillStyle = '#1B4F9C';
+          ctx.beginPath();
+          ctx.arc(110, 110, 86, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath();
+          ctx.arc(110, 110, 50, 0, Math.PI * 2);
+          ctx.fill();
+          const fallback = new Image();
+          fallback.onload = () => processRealImage(fallback, 'njupt-emblem.png');
+          fallback.src = c.toDataURL('image/png');
+        };
+        img.src = '/assets/njupt-square-emblem.png';
+        return;
+      }
 
-    ctx.fillStyle = '#202124';
-    ctx.fillRect(35, 45, 50, 50);
+      if (preset === 'gradient') {
+        // High-resolution smooth scenic landscape illustration (NOT pixelated!)
+        const c = document.createElement('canvas');
+        c.width = 240;
+        c.height = 240;
+        const ctx = c.getContext('2d')!;
 
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.arc(60, 70, 15, 0, Math.PI * 2);
-    ctx.fill();
+        // 1. Smooth sunset/sky vertical gradient
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, 155);
+        skyGrad.addColorStop(0, '#134E5E');
+        skyGrad.addColorStop(0.55, '#71B280');
+        skyGrad.addColorStop(1, '#F6D365');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, 240, 155);
 
-    const img = new Image();
-    img.onload = () => processImageRaster(img, 'academic_logo.png');
-    img.src = canvas.toDataURL();
-  };
+        // 2. Smooth glowing sun
+        const sunGrad = ctx.createRadialGradient(170, 72, 6, 170, 72, 46);
+        sunGrad.addColorStop(0, '#FFFDF0');
+        sunGrad.addColorStop(0.45, '#FDE08D');
+        sunGrad.addColorStop(1, 'rgba(253, 224, 141, 0)');
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(170, 72, 46, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. Distant mountain range (soft teal-slate silhouette)
+        ctx.fillStyle = '#2C5E63';
+        ctx.beginPath();
+        ctx.moveTo(0, 155);
+        ctx.lineTo(48, 92);
+        ctx.lineTo(105, 132);
+        ctx.lineTo(165, 84);
+        ctx.lineTo(240, 138);
+        ctx.lineTo(240, 155);
+        ctx.closePath();
+        ctx.fill();
+
+        // 4. Foreground mountain range (deep charcoal-teal)
+        ctx.fillStyle = '#18363A';
+        ctx.beginPath();
+        ctx.moveTo(0, 160);
+        ctx.lineTo(0, 128);
+        ctx.lineTo(78, 102);
+        ctx.lineTo(142, 144);
+        ctx.lineTo(204, 108);
+        ctx.lineTo(240, 132);
+        ctx.lineTo(240, 160);
+        ctx.closePath();
+        ctx.fill();
+
+        // 5. Calm lake reflection gradient at bottom
+        const lakeGrad = ctx.createLinearGradient(0, 155, 0, 240);
+        lakeGrad.addColorStop(0, '#D4B56A');
+        lakeGrad.addColorStop(0.4, '#3B7A78');
+        lakeGrad.addColorStop(1, '#0F292E');
+        ctx.fillStyle = lakeGrad;
+        ctx.fillRect(0, 155, 240, 85);
+
+        // 6. Subtle water shimmer lines
+        ctx.fillStyle = 'rgba(255, 253, 240, 0.35)';
+        for (let i = 0; i < 6; i++) {
+          const y = 166 + i * 11;
+          const w = 44 - i * 5;
+          ctx.fillRect(170 - w / 2, y, w, 2.5);
+        }
+
+        const img = new Image();
+        img.onload = () => processRealImage(img, 'scenic_landscape.png');
+        img.src = c.toDataURL('image/png');
+        return;
+      }
+
+      // Default: 'diagram' (High-contrast academic diagram rendered at crisp 240x240)
+      const c = document.createElement('canvas');
+      c.width = 240;
+      c.height = 240;
+      const ctx = c.getContext('2d')!;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, 240, 240);
+      ctx.fillStyle = '#147D78';
+      ctx.fillRect(30, 30, 180, 45);
+      ctx.fillRect(30, 165, 180, 45);
+      ctx.fillStyle = '#202124';
+      ctx.fillRect(60, 75, 120, 90);
+      ctx.fillStyle = '#89CFCB';
+      ctx.fillRect(90, 90, 60, 60);
+
+      const img = new Image();
+      img.onload = () => processRealImage(img, 'academic_diagram.png');
+      img.src = c.toDataURL('image/png');
+    },
+    [processRealImage]
+  );
+
+  useEffect(() => {
+    loadPreset('diagram');
+  }, [loadPreset]);
+
+  // Sub-step animations within Stage 4 (Huffman Tree) and Stage 6 (Reconstructed PNG)
+  useEffect(() => {
+    setSubStep(0);
+
+    if (stage === 4) {
+      const t1 = window.setTimeout(() => setSubStep(1), 650);
+      const t2 = window.setTimeout(() => setSubStep(2), 1350);
+      const t3 = window.setTimeout(() => setSubStep(3), 2050);
+      let nextTimer: number | undefined;
+      if (isPlaying) {
+        nextTimer = window.setTimeout(() => setStage(5), 3500);
+      }
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+        if (nextTimer) clearTimeout(nextTimer);
+      };
+    }
+
+    if (stage === 6) {
+      const t1 = window.setTimeout(() => setSubStep(1), 700);
+      if (isPlaying) {
+        setIsPlaying(false);
+      }
+      return () => clearTimeout(t1);
+    }
+
+    if (!isPlaying) return;
+
+    const timer = window.setTimeout(() => {
+      if (stage < 6) {
+        setStage((s) => s + 1);
+      } else {
+        setIsPlaying(false);
+      }
+    }, 2600);
+
+    return () => clearTimeout(timer);
+  }, [stage, isPlaying, setStage]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -293,131 +521,188 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = () 
     reader.onload = (ev) => {
       const img = new Image();
       img.onload = () => {
-        processImageRaster(img, file.name);
-        setStage(1);
-        setAutoPlay(true);
+        setActivePreset('custom');
+        processRealImage(img, file.name);
+        setStage(0);
       };
       img.src = ev.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
 
-  const startDemo = () => {
-    setStage(1);
-    setAutoPlay(true);
-  };
+  if (!data) return null;
 
-  const replayDemo = () => {
-    setStage(1);
-    setAutoPlay(true);
-  };
+  const s0 = data.topSymbols[0];
+  const s1 = data.topSymbols[1];
+  const s2 = data.topSymbols[2];
+  const s3 = data.topSymbols[3];
 
-  // Render side-by-side canvases when at stage 7
-  useEffect(() => {
-    if (stage === 7 && analysis) {
-      if (origCanvasRef.current && reconCanvasRef.current) {
-        origCanvasRef.current.width = analysis.width;
-        origCanvasRef.current.height = analysis.height;
-        reconCanvasRef.current.width = analysis.width;
-        reconCanvasRef.current.height = analysis.height;
+  const m1 = s3.pct + s2.pct;
+  const m2 = m1 + s1.pct;
+  const m3 = m2 + s0.pct;
 
-        const ctxO = origCanvasRef.current.getContext('2d');
-        const ctxR = reconCanvasRef.current.getContext('2d');
-        const img = new Image();
-        img.onload = () => {
-          ctxO?.drawImage(img, 0, 0);
-          ctxR?.drawImage(img, 0, 0);
-        };
-        img.src = analysis.dataUrl;
-      }
-    }
-  }, [stage, analysis]);
+  const showUnifiedGrid = stage === 0 || stage === 1 || stage === 2 || stage === 5 || stage === 6;
+  const isGridSeparated = stage === 1 || stage === 2 || stage === 5 || (stage === 6 && subStep === 0);
 
   return (
     <SlideLayout
       slideNumber={13}
       totalSlides={14}
-      title="Live Demonstration: Huffman Image Compression"
-      subtitle="One Continuous Transformation Sequence from Pixels to Binary"
+      title="Live Demonstration: From Image to PNG"
+      subtitle="Real-Time Step-by-Step Visual Transformation"
     >
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          backgroundColor: '#FFFFFF',
           justifyContent: 'space-between',
-          position: 'relative',
+          userSelect: 'none',
         }}
       >
-        {/* Subtle Top Status & Minimal Controls (Clean, Uncluttered) */}
+        {/* Top Interactive Stepper & Quick-Select Preset Bar */}
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            paddingBottom: '16px',
-            borderBottom: '1px solid #EBEBEB',
+            gap: '12px',
+            paddingBottom: '12px',
+            borderBottom: '1px solid #E8E8E8',
           }}
         >
-          {/* Active Story Step Breadcrumb */}
-          <div style={{ fontSize: '22px', fontWeight: 700, color: '#147D78' }}>
-            {stage === 0 && 'Ready to Demonstrate'}
-            {stage === 1 && '1. Source Image Display'}
-            {stage === 2 && '2. Image → Visible Pixel Grid'}
-            {stage === 3 && '3. Pixels → Numerical RGBA Values'}
-            {stage === 4 && '4. Numerical Values → Symbol Frequencies'}
-            {stage === 5 && '5. Greedy Merges → Huffman Binary Tree'}
-            {stage === 6 && '6. Tree Traversal → Binary Bitstream'}
-            {stage === 7 && '7. Binary Stream → Exact Lossless Reconstruction'}
+          {/* Clickable Step Pills */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {STAGES.map((s, idx) => {
+              const active = stage === s.id;
+              const passed = stage > s.id;
+              return (
+                <React.Fragment key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsPlaying(false);
+                      setStage(s.id);
+                    }}
+                    style={{
+                      padding: '7px 13px',
+                      fontSize: '15px',
+                      fontWeight: active ? 800 : 600,
+                      backgroundColor: active ? '#147D78' : passed ? '#EBF7F6' : '#F5F5F5',
+                      color: active ? '#FFFFFF' : passed ? '#147D78' : '#777777',
+                      border: active ? '2px solid #147D78' : '2px solid transparent',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      transition: 'all 0.25s ease',
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                  {idx < STAGES.length - 1 && (
+                    <span style={{ color: passed ? '#147D78' : '#CCCCCC', fontWeight: 700, fontSize: '14px' }}>
+                      &rarr;
+                    </span>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
 
-          {/* Minimal Controls */}
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          {/* Quick-Select Preset Bar + Auto-Play */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <input
-              type="file"
               ref={fileInputRef}
+              type="file"
+              accept="image/*"
               onChange={handleFileUpload}
-              accept="image/png,image/jpeg,image/webp"
               style={{ display: 'none' }}
             />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
+
+            {/* Quick-Select Presets */}
+            <div
               style={{
-                backgroundColor: '#FFFFFF',
-                color: '#202124',
-                border: '2px solid #202124',
-                padding: '8px 18px',
-                fontSize: '18px',
-                fontWeight: 600,
-                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                backgroundColor: '#F5F5F5',
+                padding: '4px',
+                borderRadius: '5px',
+                border: '1px solid #E0E0E0',
               }}
             >
-              Upload Another Image
-            </button>
-            {stage > 0 && (
+              {[
+                { id: 'diagram' as PresetId, label: '📐 Diagram' },
+                { id: 'emblem' as PresetId, label: '🏛️ NJUPT Emblem' },
+                { id: 'gradient' as PresetId, label: '🌄 Multi-Tone' },
+              ].map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => {
+                    setIsPlaying(false);
+                    loadPreset(p.id);
+                    setStage(0);
+                  }}
+                  style={{
+                    padding: '5px 11px',
+                    fontSize: '14px',
+                    fontWeight: activePreset === p.id ? 800 : 600,
+                    backgroundColor: activePreset === p.id ? '#202124' : 'transparent',
+                    color: activePreset === p.id ? '#FFFFFF' : '#444444',
+                    border: 'none',
+                    borderRadius: '3px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {p.label}
+                </button>
+              ))}
               <button
                 type="button"
-                onClick={replayDemo}
+                onClick={() => fileInputRef.current?.click()}
                 style={{
-                  backgroundColor: '#147D78',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  padding: '8px 18px',
-                  fontSize: '18px',
-                  fontWeight: 700,
+                  padding: '5px 11px',
+                  fontSize: '14px',
+                  fontWeight: activePreset === 'custom' ? 800 : 600,
+                  backgroundColor: activePreset === 'custom' ? '#202124' : '#FFFFFF',
+                  color: activePreset === 'custom' ? '#FFFFFF' : '#202124',
+                  border: '1px solid #CCCCCC',
+                  borderRadius: '3px',
                   cursor: 'pointer',
                 }}
               >
-                Replay Demonstration &#8634;
+                📁 Upload...
               </button>
-            )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (stage === 6 && !isPlaying) {
+                  setStage(0);
+                  setIsPlaying(true);
+                } else {
+                  setIsPlaying((p) => !p);
+                }
+              }}
+              style={{
+                backgroundColor: '#147D78',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '7px 16px',
+                fontSize: '15px',
+                fontWeight: 700,
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              {isPlaying ? 'Pause' : stage === 6 ? 'Replay ↻' : 'Auto-Play ▶'}
+            </button>
           </div>
         </div>
 
-        {/* ================= HERO STAGE VIEWPORT ================= */}
-        {/* Exactly ONE central visual focus at all times */}
+        {/* ================= SINGLE CENTERED VISUAL CANVAS ================= */}
         <div
           style={{
             flex: 1,
@@ -426,492 +711,396 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = () 
             alignItems: 'center',
             justifyContent: 'center',
             position: 'relative',
-            padding: '20px 0',
           }}
         >
-          {/* STAGE 0: Initial Screen ("Let's compress an image.") */}
-          {stage === 0 && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-                animation: 'fadeUp 0.6s ease both',
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: '56px',
-                  fontWeight: 800,
-                  color: '#202124',
-                  margin: '0 0 20px 0',
-                }}
-              >
-                Let&apos;s compress an image.
-              </h2>
-              <div style={{ fontSize: '28px', color: '#666666', marginBottom: '40px', maxWidth: '800px', lineHeight: 1.4 }}>
-                Watch a digital image progressively transform through pixels, numerical frequencies, greedy tree merges, and back into an exact lossless reproduction.
-              </div>
-
-              <div style={{ display: 'flex', gap: '20px' }}>
-                <button
-                  type="button"
-                  onClick={startDemo}
-                  style={{
-                    backgroundColor: '#147D78',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    padding: '16px 36px',
-                    fontSize: '24px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    boxShadow: '0 6px 20px rgba(20,125,120,0.25)',
-                  }}
-                >
-                  Start Demonstration &rarr;
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    color: '#202124',
-                    border: '2px solid #202124',
-                    padding: '16px 32px',
-                    fontSize: '24px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Upload Custom Image
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* STAGE 1: Prominent Image Display */}
-          {stage === 1 && analysis && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                animation: 'scaleIn 0.5s ease both',
-              }}
-            >
+          {/* 1. UNIFIED MORPHING GRID (Stage 0, 1, 2, 5, 6) */}
+          {showUnifiedGrid && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
               <div
                 style={{
-                  padding: '16px',
+                  position: 'relative',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(8, 52px)',
+                  gridTemplateRows: 'repeat(8, 52px)',
+                  gap: isGridSeparated ? '6px' : '0px',
+                  padding: isGridSeparated ? '12px' : '0px',
                   backgroundColor: '#FFFFFF',
-                  border: '2px solid #202124',
-                  boxShadow: '0 12px 36px rgba(0,0,0,0.08)',
+                  border: '3px solid #202124',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.08)',
+                  transition: 'all 0.65s cubic-bezier(0.22, 1, 0.36, 1)',
                 }}
               >
+                {data.gridCells.map((cell, idx) => {
+                  const isValueMode = stage === 2;
+                  const isBinaryMode = stage === 5;
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        backgroundColor:
+                          isValueMode || isBinaryMode
+                            ? '#F8FAFA'
+                            : `rgb(${cell.r}, ${cell.g}, ${cell.b})`,
+                        border:
+                          isValueMode || isBinaryMode
+                            ? '1.5px solid #147D78'
+                            : isGridSeparated
+                            ? '1px solid rgba(0,0,0,0.12)'
+                            : 'none',
+                        borderRadius: isGridSeparated ? '3px' : '0px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontFamily: 'monospace',
+                        fontWeight: 800,
+                        fontSize: isBinaryMode ? '15px' : '18px',
+                        color: isBinaryMode ? '#147D78' : '#202124',
+                        transition: 'all 0.55s cubic-bezier(0.22, 1, 0.36, 1)',
+                      }}
+                    >
+                      {isValueMode && (
+                        <span style={{ animation: 'fadeIn 0.35s ease both' }}>{cell.val}</span>
+                      )}
+                      {isBinaryMode && (
+                        <span style={{ animation: 'fadeIn 0.35s ease both' }}>{cell.code}</span>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Full-resolution crisp image overlay when in Stage 0 or fused in Stage 6 (Smooth rendering!) */}
                 <img
-                  src={analysis.dataUrl}
-                  alt="Original input"
+                  src={stage === 6 ? data.reconstructedUrl : data.originalUrl}
+                  alt="Canvas"
                   style={{
-                    maxWidth: '440px',
-                    maxHeight: '340px',
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
                     objectFit: 'contain',
-                    imageRendering: 'pixelated',
-                    display: 'block',
+                    imageRendering: 'auto',
+                    opacity: stage === 0 || (stage === 6 && subStep >= 1) ? 1 : 0,
+                    pointerEvents: 'none',
+                    transition: 'opacity 0.6s ease',
+                    backgroundColor: '#FFFFFF',
                   }}
                 />
               </div>
-              <div style={{ fontSize: '26px', color: '#202124', fontWeight: 600, marginTop: '24px' }}>
-                Source image loaded at full decoded resolution ({analysis.width} &times; {analysis.height} px)
-              </div>
+
+              {stage === 5 && (
+                <div
+                  style={{
+                    padding: '10px 24px',
+                    backgroundColor: '#F4FAF9',
+                    border: '1.5px solid #147D78',
+                    fontSize: '20px',
+                    fontWeight: 700,
+                    color: '#147D78',
+                    animation: 'fadeIn 0.4s ease both',
+                  }}
+                >
+                  8.00 bits/byte &rarr; {data.avgBitsPerByte} bits/byte ({data.savingsPct}% bit reduction)
+                </div>
+              )}
+
+              {stage === 6 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '24px',
+                    padding: '12px 28px',
+                    backgroundColor: '#E8F5E9',
+                    border: '2px solid #2E7D32',
+                    fontSize: '20px',
+                    fontWeight: 700,
+                    color: '#2E7D32',
+                    animation: 'fadeIn 0.4s ease both',
+                  }}
+                >
+                  <span>
+                    Raw: {(data.rawBits / 8192).toFixed(1)} KB &rarr; Huffman: {(data.compressedBits / 8192).toFixed(1)} KB (-{data.savingsPct}%)
+                  </span>
+                  <span>&bull;</span>
+                  <span>{data.isLossless ? '100% Exact Lossless Match ✓' : 'Verified'}</span>
+                </div>
+              )}
             </div>
           )}
 
-          {/* STAGE 2: Image to Visible Pixels */}
-          {stage === 2 && analysis && (
+          {/* 2. STAGE 3: FREQUENCY DISTRIBUTION (Bars colored with the actual pixel color + high-contrast outline!) */}
+          {stage === 3 && (
             <div
               style={{
+                width: '100%',
+                maxWidth: '780px',
+                padding: '36px 48px',
+                backgroundColor: '#FFFFFF',
+                border: '2px solid #202124',
+                boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                animation: 'fadeUp 0.5s ease both',
+                gap: '22px',
+                animation: 'fadeIn 0.4s ease both',
               }}
             >
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(8, 48px)',
-                  gridTemplateRows: 'repeat(8, 48px)',
-                  gap: '4px',
-                  backgroundColor: '#FFFFFF',
-                  padding: '14px',
-                  border: '3px solid #147D78',
-                  boxShadow: '0 12px 32px rgba(20,125,120,0.15)',
-                }}
-              >
-                {analysis.samplePixels.slice(0, 64).map((p, idx) => (
+              {data.topSymbols.map((item) => (
+                <div key={item.symbol} style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+                  {/* Pixel Color Swatch */}
                   <div
-                    key={idx}
                     style={{
-                      backgroundColor: `rgba(${p.r},${p.g},${p.b},${p.a / 255})`,
-                      borderRadius: '2px',
-                      border: '1px solid rgba(0,0,0,0.1)',
-                      animation: `scaleIn 0.3s ease ${idx * 0.008}s both`,
+                      width: '34px',
+                      height: '34px',
+                      backgroundColor: item.color,
+                      border: '2px solid #202124',
+                      borderRadius: '4px',
+                      flexShrink: 0,
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                     }}
                   />
-                ))}
-              </div>
-              <div style={{ fontSize: '28px', color: '#202124', fontWeight: 700, marginTop: '24px' }}>
-                The image consists of discrete, colored pixels.
-              </div>
-            </div>
-          )}
-
-          {/* STAGE 3: Pixels to Numerical RGBA Values */}
-          {stage === 3 && analysis && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                animation: 'fadeUp 0.5s ease both',
-              }}
-            >
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(8, 80px)',
-                  gap: '10px',
-                  padding: '24px',
-                  backgroundColor: '#F8F9FA',
-                  border: '2px solid #202124',
-                }}
-              >
-                {analysis.sampleBytes.slice(0, 16).map((b, idx) => (
                   <div
-                    key={idx}
                     style={{
-                      padding: '14px 4px',
-                      textAlign: 'center',
-                      backgroundColor: '#FFFFFF',
-                      border: '2px solid #147D78',
+                      width: '120px',
                       fontFamily: 'monospace',
-                      fontSize: '26px',
+                      fontSize: '22px',
                       fontWeight: 800,
-                      color: '#147D78',
-                      animation: `scaleIn 0.3s ease ${idx * 0.04}s both`,
+                      color: '#202124',
                     }}
                   >
-                    {b}
+                    Byte {item.symbol}
                   </div>
-                ))}
-              </div>
-              <div style={{ fontSize: '28px', color: '#202124', fontWeight: 700, marginTop: '24px' }}>
-                Every pixel translates directly into numerical byte values (0 to 255).
-              </div>
+                  {/* Contrasting Track Container so even pure white pixel bars stand out clearly */}
+                  <div
+                    style={{
+                      flex: 1,
+                      height: '32px',
+                      backgroundColor: '#E2E7EC',
+                      border: '1.5px solid #C4CDD5',
+                      borderRadius: '5px',
+                      padding: '3px',
+                      boxSizing: 'border-box',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${Math.max(8, item.pct)}%`,
+                        height: '100%',
+                        backgroundColor: item.color,
+                        border: item.isLight ? '2px solid #202124' : '1.5px solid rgba(0,0,0,0.35)',
+                        borderRadius: '3px',
+                        boxSizing: 'border-box',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                        transformOrigin: 'left center',
+                        animation: 'barGrow 0.65s cubic-bezier(0.22, 1, 0.36, 1) both',
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: '72px',
+                      textAlign: 'right',
+                      fontFamily: 'monospace',
+                      fontSize: '22px',
+                      fontWeight: 800,
+                      color: '#147D78',
+                    }}
+                  >
+                    {item.pct}%
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* STAGE 4: Frequency Analysis */}
-          {stage === 4 && analysis && (
+          {/* 3. STAGE 4: STEP-BY-STEP BOTTOM-UP GREEDY HUFFMAN TREE MERGES */}
+          {stage === 4 && (
             <div
               style={{
+                width: '860px',
+                height: '440px',
+                backgroundColor: '#FFFFFF',
+                border: '2px solid #202124',
+                boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
-                width: '100%',
-                maxWidth: '900px',
-                animation: 'fadeUp 0.5s ease both',
+                justifyContent: 'center',
+                animation: 'fadeIn 0.4s ease both',
               }}
             >
-              <div
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  padding: '32px 40px',
-                  backgroundColor: '#FFFFFF',
-                  border: '2px solid #202124',
-                }}
-              >
-                {analysis.topSymbols.map((item, idx) => (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <span style={{ width: '160px', fontSize: '24px', fontFamily: 'monospace', fontWeight: 700 }}>
-                      Symbol {item.symbol}:
-                    </span>
-                    <div style={{ flex: 1, backgroundColor: '#EEEEEE', height: '30px', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div
-                        style={{
-                          width: `${Math.max(10, Math.min(100, item.pct * 2.2))}%`,
-                          height: '100%',
-                          backgroundColor: idx === 0 ? '#147D78' : '#202124',
-                          transition: 'width 0.8s ease',
-                        }}
+              <svg viewBox="0 0 800 410" style={{ width: '100%', height: '100%' }}>
+                {/* Bottom-up edges growing from children -> parent */}
+                {subStep >= 1 && (
+                  <>
+                    <CleanEdge childX={500} childY={345} childR={28} parentX={580} parentY={255} parentR={26} bit="0" active={subStep === 1} />
+                    <CleanEdge childX={660} childY={345} childR={28} parentX={580} parentY={255} parentR={26} bit="1" active={subStep === 1} />
+                  </>
+                )}
+
+                {subStep >= 2 && (
+                  <>
+                    <CleanEdge childX={340} childY={255} childR={28} parentX={460} parentY={155} parentR={28} bit="0" active={subStep === 2} />
+                    <CleanEdge childX={580} childY={255} childR={26} parentX={460} parentY={155} parentR={28} bit="1" active={subStep === 2} />
+                  </>
+                )}
+
+                {subStep >= 3 && (
+                  <>
+                    <CleanEdge childX={180} childY={155} childR={30} parentX={320} parentY={55} parentR={32} bit="0" active={subStep === 3} />
+                    <CleanEdge childX={460} childY={155} childR={28} parentX={320} parentY={55} parentR={32} bit="1" active={subStep === 3} />
+                  </>
+                )}
+
+                <g>
+                  <circle
+                    cx={500}
+                    cy={345}
+                    r={28}
+                    fill={subStep === 1 ? '#E6F4F3' : '#FAFAFA'}
+                    stroke={subStep === 1 ? '#147D78' : '#202124'}
+                    strokeWidth={subStep === 1 ? 3 : 2}
+                  />
+                  <text x={500} y={338} textAnchor="middle" fontSize="15" fontWeight="800" fill="#202124">
+                    {s2.symbol}
+                  </text>
+                  <text x={500} y={356} textAnchor="middle" fontSize="13" fontWeight="700" fill="#147D78">
+                    {s2.pct}%
+                  </text>
+
+                  <circle
+                    cx={660}
+                    cy={345}
+                    r={28}
+                    fill={subStep === 1 ? '#E6F4F3' : '#FAFAFA'}
+                    stroke={subStep === 1 ? '#147D78' : '#202124'}
+                    strokeWidth={subStep === 1 ? 3 : 2}
+                  />
+                  <text x={660} y={338} textAnchor="middle" fontSize="15" fontWeight="800" fill="#202124">
+                    {s3.symbol}
+                  </text>
+                  <text x={660} y={356} textAnchor="middle" fontSize="13" fontWeight="700" fill="#147D78">
+                    {s3.pct}%
+                  </text>
+                </g>
+
+                {subStep >= 1 && (
+                  <g transform="translate(580, 255)">
+                    <g style={{ animation: 'nodePopIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both' }}>
+                      <circle
+                        cx={0}
+                        cy={0}
+                        r={26}
+                        fill={subStep === 1 ? '#E6F4F3' : '#FFFFFF'}
+                        stroke="#147D78"
+                        strokeWidth="3"
                       />
-                    </div>
-                    <span style={{ width: '120px', fontSize: '24px', fontFamily: 'monospace', fontWeight: 700, color: '#147D78', textAlign: 'right' }}>
-                      {item.pct.toFixed(0)}%
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ fontSize: '28px', color: '#202124', fontWeight: 700, marginTop: '24px' }}>
-                Certain values appear far more frequently than others.
-              </div>
-            </div>
-          )}
-
-          {/* STAGE 5: Huffman Tree Merges (The Core Greedy Algorithm) */}
-          {stage === 5 && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                animation: 'fadeUp 0.5s ease both',
-              }}
-            >
-              <div
-                style={{
-                  width: '740px',
-                  height: '380px',
-                  backgroundColor: '#FFFFFF',
-                  border: '2px solid #202124',
-                  padding: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <svg viewBox="0 0 700 360" style={{ width: '100%', height: '100%' }}>
-                  {/* Leaves: Sym4(4%), Sym3(8%), Sym2(18%), Sym1(28%), Sym0(42%) */}
-                  {/* Step 0: Highlight lowest two (4% and 8%) */}
-                  <circle cx="560" cy="300" r="24" fill={treeMergeStep === 0 ? '#E6F4F3' : '#FAFAFA'} stroke={treeMergeStep === 0 ? '#147D78' : '#202124'} strokeWidth={treeMergeStep === 0 ? 3.5 : 2} />
-                  <text x="560" y="300" textAnchor="middle" dominantBaseline="central" fontSize="15" fontWeight="700">4%</text>
-
-                  <circle cx="640" cy="300" r="24" fill={treeMergeStep === 0 ? '#E6F4F3' : '#FAFAFA'} stroke={treeMergeStep === 0 ? '#147D78' : '#202124'} strokeWidth={treeMergeStep === 0 ? 3.5 : 2} />
-                  <text x="640" y="300" textAnchor="middle" dominantBaseline="central" fontSize="15" fontWeight="700">8%</text>
-
-                  {/* Merge 1: 4% + 8% -> 12% */}
-                  {treeMergeStep >= 1 && (
-                    <g>
-                      <line x1="600" y1="210" x2="560" y2="300" stroke="#147D78" strokeWidth="2.5" />
-                      <line x1="600" y1="210" x2="640" y2="300" stroke="#147D78" strokeWidth="2.5" />
-                      <circle cx="600" cy="210" r="26" fill={treeMergeStep === 1 ? '#E6F4F3' : '#FFFFFF'} stroke={treeMergeStep === 1 ? '#147D78' : '#202124'} strokeWidth={treeMergeStep === 1 ? 3.5 : 2} />
-                      <text x="600" y="210" textAnchor="middle" dominantBaseline="central" fontSize="16" fontWeight="700">12%</text>
+                      <text x={0} y={0} textAnchor="middle" dominantBaseline="central" fontSize="16" fontWeight="800" fill="#202124">
+                        {m1}%
+                      </text>
                     </g>
-                  )}
+                  </g>
+                )}
 
-                  {/* Leaf 18% */}
-                  <circle cx="480" cy="210" r="26" fill={treeMergeStep === 1 ? '#E6F4F3' : '#FAFAFA'} stroke={treeMergeStep === 1 ? '#147D78' : '#202124'} strokeWidth={treeMergeStep === 1 ? 3.5 : 2} />
-                  <text x="480" y="210" textAnchor="middle" dominantBaseline="central" fontSize="16" fontWeight="700">18%</text>
-
-                  {/* Merge 2: 12% + 18% -> 30% */}
-                  {treeMergeStep >= 2 && (
-                    <g>
-                      <line x1="540" y1="130" x2="480" y2="210" stroke="#147D78" strokeWidth="2.5" />
-                      <line x1="540" y1="130" x2="600" y2="210" stroke="#147D78" strokeWidth="2.5" />
-                      <circle cx="540" cy="130" r="28" fill={treeMergeStep === 2 ? '#E6F4F3' : '#FFFFFF'} stroke={treeMergeStep === 2 ? '#147D78' : '#202124'} strokeWidth={treeMergeStep === 2 ? 3.5 : 2} />
-                      <text x="540" y="130" textAnchor="middle" dominantBaseline="central" fontSize="17" fontWeight="700">30%</text>
-                    </g>
-                  )}
-
-                  {/* Leaf 28% */}
-                  <circle cx="360" cy="130" r="28" fill={treeMergeStep === 2 ? '#E6F4F3' : '#FAFAFA'} stroke={treeMergeStep === 2 ? '#147D78' : '#202124'} strokeWidth={treeMergeStep === 2 ? 3.5 : 2} />
-                  <text x="360" y="130" textAnchor="middle" dominantBaseline="central" fontSize="17" fontWeight="700">28%</text>
-
-                  {/* Merge 3: 28% + 30% -> 58% */}
-                  {treeMergeStep >= 3 && (
-                    <g>
-                      <line x1="450" y1="50" x2="360" y2="130" stroke="#147D78" strokeWidth="2.5" />
-                      <line x1="450" y1="50" x2="540" y2="130" stroke="#147D78" strokeWidth="2.5" />
-                      <circle cx="450" cy="50" r="30" fill="#E6F4F3" stroke="#147D78" strokeWidth="3.5" />
-                      <text x="450" y="50" textAnchor="middle" dominantBaseline="central" fontSize="18" fontWeight="800">58%</text>
-                    </g>
-                  )}
-
-                  {/* Leaf 42% (Frequent Background) */}
-                  <circle cx="180" cy="130" r="34" fill="#E6F4F3" stroke="#147D78" strokeWidth="3.5" />
-                  <text x="180" y="122" textAnchor="middle" fontSize="19" fontWeight="800" fill="#147D78">42%</text>
-                  <text x="180" y="142" textAnchor="middle" fontSize="14" fill="#555">Code: &apos;0&apos;</text>
-
-                  {/* Final Connection from Root (100) to 42% and 58% */}
-                  {treeMergeStep >= 3 && (
-                    <g>
-                      <line x1="315" y1="20" x2="180" y2="130" stroke="#147D78" strokeWidth="3" />
-                      <text x="240" y="65" fill="#147D78" fontSize="22" fontWeight="800">0</text>
-
-                      <line x1="315" y1="20" x2="450" y2="50" stroke="#147D78" strokeWidth="3" />
-                      <text x="380" y="30" fill="#147D78" fontSize="22" fontWeight="800">1</text>
-
-                      <circle cx="315" cy="20" r="24" fill="#147D78" />
-                      <text x="315" y="20" textAnchor="middle" dominantBaseline="central" fill="#FFF" fontSize="16" fontWeight="800">100</text>
-                    </g>
-                  )}
-                </svg>
-              </div>
-              <div style={{ fontSize: '28px', color: '#147D78', fontWeight: 700, marginTop: '20px' }}>
-                Repeatedly combine the two least frequent nodes to build the tree.
-              </div>
-            </div>
-          )}
-
-          {/* STAGE 6: Binary Encoding (Values to Bits) */}
-          {stage === 6 && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                animation: 'fadeUp 0.5s ease both',
-                width: '100%',
-                maxWidth: '960px',
-              }}
-            >
-              <div
-                style={{
-                  width: '100%',
-                  padding: '36px 40px',
-                  backgroundColor: '#FFFFFF',
-                  border: '2px solid #202124',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
-                }}
-              >
-                <div style={{ fontSize: '20px', color: '#777777', textTransform: 'uppercase', fontWeight: 700, marginBottom: '14px' }}>
-                  Packed Binary Bitstream Representation:
-                </div>
-                <div
-                  style={{
-                    fontFamily: 'monospace',
-                    fontSize: '44px',
-                    fontWeight: 800,
-                    color: '#147D78',
-                    letterSpacing: '0.14em',
-                    lineHeight: 1.4,
-                    wordBreak: 'break-all',
-                  }}
-                >
-                  0 0 10 0 110 0 10 1110 0 0 10 0 110 0 10 1111 0 0 0
-                </div>
-              </div>
-              <div style={{ fontSize: '28px', color: '#202124', fontWeight: 700, marginTop: '24px' }}>
-                The original numerical values transform into compact, prefix-free binary codes.
-              </div>
-            </div>
-          )}
-
-          {/* STAGE 7: Reconstruction (Exact Side-by-Side Match) */}
-          {stage === 7 && analysis && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                animation: 'fadeUp 0.5s ease both',
-                width: '100%',
-                maxWidth: '960px',
-              }}
-            >
-              {/* Side-by-Side Images */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '50px',
-                  marginBottom: '28px',
-                }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ fontSize: '22px', fontWeight: 700, color: '#202124', marginBottom: '10px' }}>
-                    Original Image
-                  </div>
-                  <canvas
-                    ref={origCanvasRef}
-                    style={{
-                      maxWidth: '280px',
-                      maxHeight: '220px',
-                      imageRendering: 'pixelated',
-                      border: '2px solid #CCCCCC',
-                    }}
+                <g>
+                  <circle
+                    cx={340}
+                    cy={255}
+                    r={28}
+                    fill={subStep === 2 ? '#E6F4F3' : '#FAFAFA'}
+                    stroke={subStep === 2 ? '#147D78' : '#202124'}
+                    strokeWidth={subStep === 2 ? 3 : 2}
                   />
-                </div>
+                  <text x={340} y={248} textAnchor="middle" fontSize="15" fontWeight="800" fill="#202124">
+                    {s1.symbol}
+                  </text>
+                  <text x={340} y={266} textAnchor="middle" fontSize="13" fontWeight="700" fill="#147D78">
+                    {s1.pct}%
+                  </text>
+                </g>
 
-                <div style={{ fontSize: '42px', color: '#147D78', fontWeight: 800 }}>&harr;</div>
+                {subStep >= 2 && (
+                  <g transform="translate(460, 155)">
+                    <g style={{ animation: 'nodePopIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both' }}>
+                      <circle
+                        cx={0}
+                        cy={0}
+                        r={28}
+                        fill={subStep === 2 ? '#E6F4F3' : '#FFFFFF'}
+                        stroke="#147D78"
+                        strokeWidth="3"
+                      />
+                      <text x={0} y={0} textAnchor="middle" dominantBaseline="central" fontSize="17" fontWeight="800" fill="#202124">
+                        {m2}%
+                      </text>
+                    </g>
+                  </g>
+                )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ fontSize: '22px', fontWeight: 700, color: '#147D78', marginBottom: '10px' }}>
-                    Reconstructed Image
-                  </div>
-                  <canvas
-                    ref={reconCanvasRef}
-                    style={{
-                      maxWidth: '280px',
-                      maxHeight: '220px',
-                      imageRendering: 'pixelated',
-                      border: '2px solid #147D78',
-                    }}
+                <g>
+                  <circle
+                    cx={180}
+                    cy={155}
+                    r={30}
+                    fill={subStep === 3 ? '#E6F4F3' : '#FAFAFA'}
+                    stroke={subStep === 3 ? '#147D78' : '#202124'}
+                    strokeWidth={subStep === 3 ? 3 : 2}
                   />
-                </div>
-              </div>
+                  <text x={180} y={147} textAnchor="middle" fontSize="16" fontWeight="800" fill="#202124">
+                    {s0.symbol}
+                  </text>
+                  <text x={180} y={166} textAnchor="middle" fontSize="14" fontWeight="700" fill="#147D78">
+                    {s0.pct}%
+                  </text>
+                </g>
 
-              {/* Verified Pass Banner */}
-              <div
-                style={{
-                  width: '100%',
-                  padding: '20px 32px',
-                  backgroundColor: '#E8F5E9',
-                  border: '2px solid #2E7D32',
-                  borderLeft: '12px solid #2E7D32',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: '28px', fontWeight: 800, color: '#2E7D32' }}>
-                    EXACT RECONSTRUCTION: PASS
-                  </div>
-                  <div style={{ fontSize: '22px', color: '#333333', marginTop: '4px' }}>
-                    100% byte-for-byte fidelity verified &bull; Zero pixel discrepancies ({analysis.compressionRatio}% compressed)
-                  </div>
-                </div>
-                <div
-                  style={{
-                    backgroundColor: '#2E7D32',
-                    color: '#FFFFFF',
-                    fontWeight: 800,
-                    fontSize: '22px',
-                    padding: '8px 20px',
-                    borderRadius: '4px',
-                  }}
-                >
-                  LOSSLESS VERIFIED
-                </div>
-              </div>
+                {subStep >= 3 && (
+                  <g>
+                    <g transform="translate(320, 55)">
+                      <g style={{ animation: 'nodePopIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both' }}>
+                        <circle cx={0} cy={0} r={32} fill="#147D78" />
+                        <text x={0} y={0} textAnchor="middle" dominantBaseline="central" fontSize="18" fontWeight="800" fill="#FFFFFF">
+                          {m3}%
+                        </text>
+                      </g>
+                    </g>
+                    <g style={{ animation: 'fadeIn 0.35s ease 0.28s both' }}>
+                      <text x={180} y={205} textAnchor="middle" fontFamily="monospace" fontSize="17" fontWeight="800" fill="#147D78">
+                        &rarr; &quot;0&quot;
+                      </text>
+                      <text x={340} y={302} textAnchor="middle" fontFamily="monospace" fontSize="17" fontWeight="800" fill="#147D78">
+                        &rarr; &quot;10&quot;
+                      </text>
+                      <text x={500} y={392} textAnchor="middle" fontFamily="monospace" fontSize="17" fontWeight="800" fill="#147D78">
+                        &rarr; &quot;110&quot;
+                      </text>
+                      <text x={660} y={392} textAnchor="middle" fontFamily="monospace" fontSize="17" fontWeight="800" fill="#147D78">
+                        &rarr; &quot;111&quot;
+                      </text>
+                    </g>
+                  </g>
+                )}
+              </svg>
             </div>
           )}
         </div>
 
-        {/* Minimal Bottom Narrative Bar */}
+        {/* Single Clean Explanatory Sentence at Bottom */}
         <div
           style={{
-            borderTop: '1px solid #EBEBEB',
+            borderTop: '1px solid #E8E8E8',
             paddingTop: '14px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            fontSize: '20px',
-            color: '#777777',
           }}
         >
-          <span>
-            {stage === 0 && 'Click "Start Demonstration" or upload any local image file.'}
-            {stage > 0 && stage < 7 && 'Continuous transformation sequence playing automatically (~25 seconds)...'}
-            {stage === 7 && 'Demonstration complete. Replay or upload another image above.'}
-          </span>
-          <span style={{ color: '#147D78', fontWeight: 600 }}>
-            {analysis ? `${analysis.name} (${analysis.width}×${analysis.height})` : 'Ready'}
-          </span>
+          <div style={{ fontSize: '25px', fontWeight: 700, color: '#202124' }}>
+            {STAGES[stage].caption}
+          </div>
+          <div style={{ fontSize: '18px', fontFamily: 'monospace', color: '#147D78', fontWeight: 700 }}>
+            {data.name} ({data.width}&times;{data.height} px) &bull; Step {stage + 1} / 7
+          </div>
         </div>
       </div>
     </SlideLayout>

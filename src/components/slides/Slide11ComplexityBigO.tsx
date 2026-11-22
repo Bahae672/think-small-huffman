@@ -8,12 +8,39 @@ interface Slide11ComplexityBigOProps {
 export const Slide11ComplexityBigO: React.FC<Slide11ComplexityBigOProps> = ({ step = 0 }) => {
   const currentStep = Math.min(2, Math.max(0, step));
 
+  const pipelineSteps = [
+    {
+      num: '01',
+      title: 'Count Frequencies',
+      complexity: 'O(N)',
+      desc: 'Scan all N image bytes once to count how often each value appears.',
+      detail: '1 pass over the image pixels',
+      highlight: false,
+    },
+    {
+      num: '02',
+      title: 'Initialize Min-Heap',
+      complexity: 'O(k)',
+      desc: 'Insert the k unique byte values into a min-priority queue.',
+      detail: 'At most k = 256 unique byte values',
+      highlight: false,
+    },
+    {
+      num: '03',
+      title: 'Build Huffman Tree',
+      complexity: 'O(k log k)',
+      desc: 'Repeatedly extract the 2 smallest nodes and merge them (k − 1 times).',
+      detail: 'k − 1 merges × O(log k) heap step',
+      highlight: true,
+    },
+  ];
+
   return (
     <SlideLayout
       slideNumber={11}
       totalSlides={14}
-      title="Computational Complexity: Big-O Analysis"
-      subtitle="Asymptotic Runtime and Auxiliary Space Bounds in Image Processing"
+      title="Computational Complexity"
+      subtitle="How Fast Is Huffman Coding on Real Images?"
     >
       <div
         style={{
@@ -21,168 +48,294 @@ export const Slide11ComplexityBigO: React.FC<Slide11ComplexityBigOProps> = ({ st
           flexDirection: 'column',
           height: '100%',
           justifyContent: 'space-between',
+          gap: '20px',
         }}
       >
-        {/* Context parameters */}
-        <div style={{ fontSize: '28px', color: '#444444', lineHeight: 1.4 }}>
-          Let <span style={{ fontStyle: 'italic', fontFamily: 'serif', fontWeight: 700 }}>N</span> denote the total
-          image pixel byte stream, and{' '}
-          <span style={{ fontStyle: 'italic', fontFamily: 'serif', fontWeight: 700 }}>k</span> denote the alphabet size
-          (distinct symbol count, <span style={{ fontFamily: 'serif' }}>k &le; 256</span> for 8-bit image channels).
-        </div>
-
-        {/* 4-Stage Breakdown Table */}
+        {/* Top Simple Variable Legend */}
         <div
           style={{
-            backgroundColor: '#FAFAFA',
-            border: '2px solid #202124',
-            boxShadow: '6px 6px 0px rgba(0,0,0,0.06)',
-            overflow: 'hidden',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '28px',
+            animation: 'fadeUp 0.5s ease both',
           }}
         >
-          <table
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: '24px',
-              textAlign: 'left',
-            }}
-          >
-            <thead>
-              <tr style={{ borderBottom: '3px solid #202124', backgroundColor: '#F0F0F0' }}>
-                <th style={{ padding: '16px 24px', fontWeight: 800 }}>Algorithmic Stage</th>
-                <th style={{ padding: '16px 24px', fontWeight: 800 }}>Primary Operation</th>
-                <th style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 800 }}>Time Complexity</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ borderBottom: '1px solid #E0E0E0', backgroundColor: '#FFFFFF' }}>
-                <td style={{ padding: '18px 24px', fontWeight: 700 }}>1. Frequency Histogram</td>
-                <td style={{ padding: '18px 24px', color: '#555' }}>Single linear pass over raw pixel data stream</td>
-                <td style={{ padding: '18px 24px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 800 }}>
-                  O(N)
-                </td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #E0E0E0', backgroundColor: '#FFFFFF' }}>
-                <td style={{ padding: '18px 24px', fontWeight: 700 }}>2. Priority Queue Init</td>
-                <td style={{ padding: '18px 24px', color: '#555' }}>
-                  Bottom-up heapify of <em>k</em> distinct symbols (<span style={{ fontVariant: 'small-caps' }}>Build-Min-Heap</span>)
-                </td>
-                <td style={{ padding: '18px 24px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 800 }}>
-                  O(k)
-                </td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #E0E0E0', backgroundColor: '#EBF7F6' }}>
-                <td style={{ padding: '18px 24px', fontWeight: 800, color: '#147D78' }}>
-                  3. Greedy Tree Construction
-                </td>
-                <td style={{ padding: '18px 24px', color: '#147D78' }}>
-                  (k - 1) iterations of 2 &times; Extract-Min + 1 &times; Insert
-                </td>
-                <td
-                  style={{
-                    padding: '18px 24px',
-                    textAlign: 'right',
-                    fontFamily: 'monospace',
-                    fontWeight: 800,
-                    color: '#147D78',
-                    fontSize: '28px',
-                  }}
-                >
-                  O(k log k)
-                </td>
-              </tr>
-              <tr style={{ backgroundColor: '#FFFFFF' }}>
-                <td style={{ padding: '18px 24px', fontWeight: 700 }}>4. Codeword Generation</td>
-                <td style={{ padding: '18px 24px', color: '#555' }}>Depth-First Search (DFS) traversal of completed tree</td>
-                <td style={{ padding: '18px 24px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 800 }}>
-                  O(k)
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Dynamic Cards: Overall Time and Space Bounds */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '32px' }}>
-          {/* Total Time Complexity */}
           <div
             style={{
+              backgroundColor: '#FAFAFA',
               border: '2px solid #202124',
-              backgroundColor: currentStep >= 1 ? '#FFFFFF' : '#FAFAFA',
-              padding: '24px 32px',
-              opacity: currentStep >= 1 ? 1 : 0.4,
-              transition: 'opacity 0.3s ease',
-              boxShadow: currentStep >= 1 ? '6px 6px 0px rgba(20,125,120,0.15)' : 'none',
+              padding: '18px 28px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
             }}
           >
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#666', textTransform: 'uppercase' }}>
-              Overall Time Complexity
-            </div>
             <div
               style={{
-                fontSize: '44px',
+                width: '56px',
+                height: '56px',
+                backgroundColor: '#202124',
+                color: '#FFFFFF',
+                fontFamily: 'serif',
+                fontStyle: 'italic',
+                fontSize: '32px',
                 fontWeight: 800,
-                color: '#147D78',
-                fontFamily: 'monospace',
-                margin: '8px 0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '4px',
+                flexShrink: 0,
               }}
             >
-              O(N + k log k)
+              N
             </div>
-            <div style={{ fontSize: '20px', color: '#444', lineHeight: 1.45 }}>
-              In image compression, <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>N &gt;&gt; k</span>{' '}
-              (e.g., a 1080p frame has <span style={{ fontFamily: 'monospace' }}>N &approx; 2.07 &times; 10⁶</span> pixels while{' '}
-              <span style={{ fontFamily: 'monospace' }}>k &le; 256</span>). The linear <span style={{ fontFamily: 'monospace' }}>O(N)</span> scan
-              dominates wall-clock time; tree generation is negligible.
+            <div>
+              <div style={{ fontSize: '23px', fontWeight: 800, color: '#202124' }}>
+                Total Pixels / Bytes in Image
+              </div>
+              <div style={{ fontSize: '18px', color: '#555555', marginTop: '2px' }}>
+                Large number — e.g., <strong>2,000,000+ bytes</strong> in a standard photo
+              </div>
             </div>
           </div>
 
-          {/* Auxiliary Space */}
+          <div
+            style={{
+              backgroundColor: '#F4FAF9',
+              border: '2px solid #147D78',
+              padding: '18px 28px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+            }}
+          >
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                backgroundColor: '#147D78',
+                color: '#FFFFFF',
+                fontFamily: 'serif',
+                fontStyle: 'italic',
+                fontSize: '32px',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '4px',
+                flexShrink: 0,
+              }}
+            >
+              k
+            </div>
+            <div>
+              <div style={{ fontSize: '23px', fontWeight: 800, color: '#147D78' }}>
+                Unique Byte Symbols
+              </div>
+              <div style={{ fontSize: '18px', color: '#444444', marginTop: '2px' }}>
+                Tiny constant cap — at most <strong>k &le; 256</strong> possible byte values (0–255)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Middle: 3-Step Visual Complexity Pipeline */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 40px 1fr 40px 1fr',
+            alignItems: 'stretch',
+            gap: '8px',
+          }}
+        >
+          {pipelineSteps.map((item, idx) => (
+            <React.Fragment key={item.num}>
+              <div
+                style={{
+                  border: item.highlight ? '3px solid #147D78' : '2px solid #202124',
+                  backgroundColor: item.highlight ? '#F4FAF9' : '#FFFFFF',
+                  padding: '28px 28px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: item.highlight
+                    ? '8px 8px 0px rgba(20, 125, 120, 0.16)'
+                    : '6px 6px 0px rgba(0, 0, 0, 0.05)',
+                  animation: `fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) ${idx * 0.14}s both`,
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '16px',
+                        fontWeight: 800,
+                        color: item.highlight ? '#147D78' : '#777777',
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      STEP {item.num}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: '30px',
+                        fontWeight: 800,
+                        color: item.highlight ? '#FFFFFF' : '#147D78',
+                        backgroundColor: item.highlight ? '#147D78' : '#E6F4F3',
+                        padding: '6px 16px',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      {item.complexity}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: '28px',
+                      fontWeight: 800,
+                      color: '#202124',
+                      marginBottom: '12px',
+                    }}
+                  >
+                    {item.title}
+                  </div>
+
+                  <div style={{ fontSize: '20px', color: '#444444', lineHeight: 1.45 }}>
+                    {item.desc}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: '20px',
+                    paddingTop: '14px',
+                    borderTop: '1.5px dashed #D0D0D0',
+                    fontFamily: 'monospace',
+                    fontSize: '17px',
+                    fontWeight: 700,
+                    color: item.highlight ? '#147D78' : '#666666',
+                  }}
+                >
+                  &rarr; {item.detail}
+                </div>
+              </div>
+
+              {idx < 2 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '32px',
+                    fontWeight: 800,
+                    color: '#147D78',
+                  }}
+                >
+                  +
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Bottom: Progressive Total Time & Space Summary Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 0.75fr', gap: '28px' }}>
+          {/* Total Time Card */}
+          <div
+            style={{
+              border: '3px solid #147D78',
+              backgroundColor: currentStep >= 1 ? '#FFFFFF' : '#FAFAFA',
+              padding: '22px 32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '24px',
+              opacity: currentStep >= 1 ? 1 : 0.28,
+              transform: currentStep >= 1 ? 'translateY(0)' : 'translateY(8px)',
+              boxShadow: currentStep >= 1 ? '8px 8px 0px rgba(20, 125, 120, 0.15)' : 'none',
+              transition: 'all 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 800,
+                  color: '#147D78',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                }}
+              >
+                Total Time Complexity
+              </div>
+              <div
+                style={{
+                  fontSize: '42px',
+                  fontWeight: 800,
+                  color: '#202124',
+                  fontFamily: 'monospace',
+                  margin: '4px 0 8px 0',
+                }}
+              >
+                O(N + k log k)
+              </div>
+              <div style={{ fontSize: '19px', color: '#444444', lineHeight: 1.4 }}>
+                Since <strong>N &gt;&gt; k</strong>, building the 256-node tree takes <strong>under 0.1 ms</strong>.
+              </div>
+            </div>
+          </div>
+
+          {/* Space Complexity Card */}
           <div
             style={{
               border: '2px solid #202124',
               backgroundColor: currentStep >= 2 ? '#FFFFFF' : '#FAFAFA',
-              padding: '24px 32px',
-              opacity: currentStep >= 2 ? 1 : 0.4,
-              transition: 'opacity 0.3s ease',
-              boxShadow: currentStep >= 2 ? '6px 6px 0px rgba(0,0,0,0.06)' : 'none',
+              padding: '22px 32px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              opacity: currentStep >= 2 ? 1 : 0.28,
+              transform: currentStep >= 2 ? 'translateY(0)' : 'translateY(8px)',
+              boxShadow: currentStep >= 2 ? '8px 8px 0px rgba(0, 0, 0, 0.06)' : 'none',
+              transition: 'all 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
             }}
           >
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#666', textTransform: 'uppercase' }}>
-              Auxiliary Space Complexity
+            <div
+              style={{
+                fontSize: '16px',
+                fontWeight: 800,
+                color: '#666666',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+              }}
+            >
+              Extra Memory (Space)
             </div>
             <div
               style={{
-                fontSize: '44px',
+                fontSize: '42px',
                 fontWeight: 800,
-                color: '#202124',
+                color: '#147D78',
                 fontFamily: 'monospace',
-                margin: '8px 0',
+                margin: '4px 0 8px 0',
               }}
             >
               O(k)
             </div>
-            <div style={{ fontSize: '20px', color: '#444', lineHeight: 1.45 }}>
-              Stores frequency table, heap structure, and final binary tree containing exactly{' '}
-              <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>2k - 1</span> nodes (at most 511 nodes for byte
-              alphabets). Minimal working memory footprint.
+            <div style={{ fontSize: '19px', color: '#444444', lineHeight: 1.4 }}>
+              Stores at most <strong>2k &minus; 1 = 511</strong> tree nodes (&lt; 4 KB of RAM).
             </div>
           </div>
-        </div>
-
-        {/* Bottom takeaway */}
-        <div
-          style={{
-            borderLeft: '6px solid #147D78',
-            backgroundColor: '#F4FAF9',
-            padding: '16px 24px',
-            fontSize: '22px',
-            color: '#202124',
-            fontWeight: 600,
-          }}
-        >
-          <strong>Practical Real-World Implication:</strong> High-throughput encoding handles megapixel images in near-linear time since tree synthesis operates entirely in CPU L1 cache.
         </div>
       </div>
     </SlideLayout>

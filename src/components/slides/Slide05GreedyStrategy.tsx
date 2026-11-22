@@ -81,16 +81,17 @@ export const Slide05GreedyStrategy: React.FC<Slide05GreedyStrategyProps> = ({ st
             <table
               style={{
                 width: '100%',
+                tableLayout: 'fixed',
                 borderCollapse: 'collapse',
-                fontSize: '26px',
+                fontSize: '25px',
                 textAlign: 'left',
               }}
             >
               <thead>
-                <tr style={{ borderBottom: '3px solid #202124' }}>
-                  <th style={{ padding: '12px 18px', fontWeight: 700 }}>Symbol</th>
-                  <th style={{ padding: '12px 18px', textAlign: 'right', fontWeight: 700 }}>Frequency</th>
-                  <th style={{ padding: '12px 18px', fontWeight: 700 }}>Evaluation</th>
+                <tr style={{ borderBottom: '3px solid #202124', height: '52px' }}>
+                  <th style={{ width: '20%', padding: '10px 18px', fontWeight: 700 }}>Symbol</th>
+                  <th style={{ width: '25%', padding: '10px 18px', textAlign: 'right', fontWeight: 700 }}>Frequency</th>
+                  <th style={{ width: '55%', padding: '10px 18px', fontWeight: 700 }}>Evaluation</th>
                 </tr>
               </thead>
               <tbody>
@@ -100,26 +101,44 @@ export const Slide05GreedyStrategy: React.FC<Slide05GreedyStrategyProps> = ({ st
                     <tr
                       key={idx}
                       style={{
+                        height: '52px',
                         borderBottom: '1px solid #EBEBEB',
                         backgroundColor: isHighlighted ? '#E6F4F3' : 'transparent',
-                        fontWeight: isHighlighted ? 700 : 500,
-                        transition: 'background-color 0.3s ease',
+                        fontWeight: 600,
+                        transition: 'background-color 0.35s ease',
                       }}
                     >
-                      <td style={{ padding: '12px 18px', color: isHighlighted ? '#147D78' : '#202124' }}>
+                      <td
+                        style={{
+                          padding: '10px 18px',
+                          color: isHighlighted ? '#147D78' : '#202124',
+                          transition: 'color 0.35s ease',
+                        }}
+                      >
                         {item.symbol}
                       </td>
                       <td
                         style={{
-                          padding: '12px 18px',
+                          padding: '10px 18px',
                           textAlign: 'right',
                           fontFamily: 'monospace',
                           color: isHighlighted ? '#147D78' : '#202124',
+                          transition: 'color 0.35s ease',
                         }}
                       >
                         {item.freq}
                       </td>
-                      <td style={{ padding: '12px 18px', fontSize: '22px', color: isHighlighted ? '#147D78' : '#888888' }}>
+                      <td
+                        style={{
+                          padding: '10px 18px',
+                          fontSize: '21px',
+                          color: isHighlighted ? '#147D78' : '#888888',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          transition: 'color 0.35s ease',
+                        }}
+                      >
                         {isHighlighted ? 'Smallest in Q (Extract-Min)' : 'Retained in priority queue'}
                       </td>
                     </tr>
@@ -135,11 +154,13 @@ export const Slide05GreedyStrategy: React.FC<Slide05GreedyStrategyProps> = ({ st
                 alignItems: 'center',
                 gap: '20px',
                 padding: '18px 24px',
-                backgroundColor: '#FAFAFA',
-                border: '2px solid #E0E0E0',
+                backgroundColor: step >= 1 ? '#F0F9F8' : '#FAFAFA',
+                border: step >= 1 ? '2px solid #147D78' : '2px solid #E0E0E0',
                 borderLeft: '6px solid #147D78',
-                opacity: step >= 1 ? 1 : 0.85,
-                transition: 'opacity 0.4s ease',
+                opacity: step >= 1 ? 1 : 0.35,
+                transform: step >= 1 ? 'translateY(0)' : 'translateY(8px)',
+                boxShadow: step >= 1 ? '6px 6px 0px rgba(20, 125, 120, 0.14)' : 'none',
+                transition: 'all 0.45s cubic-bezier(0.22, 1, 0.36, 1)',
               }}
             >
               <div style={{ fontSize: '24px', fontWeight: 700, color: '#202124' }}>
@@ -184,6 +205,7 @@ export const Slide05GreedyStrategy: React.FC<Slide05GreedyStrategyProps> = ({ st
                     backgroundColor: '#FFFFFF',
                     border: '2px solid #E0E0E0',
                     borderLeft: idx === 0 ? '6px solid #147D78' : '2px solid #E0E0E0',
+                    animation: `fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${0.12 + idx * 0.1}s both`,
                   }}
                 >
                   <div

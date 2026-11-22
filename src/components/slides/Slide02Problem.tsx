@@ -48,6 +48,7 @@ export const Slide02Problem: React.FC<Slide02ProblemProps> = () => {
                 color: '#777777',
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
+                animation: 'fadeUp 0.5s ease both',
               }}
             >
               Academic Digital Asset Library
@@ -71,15 +72,14 @@ export const Slide02Problem: React.FC<Slide02ProblemProps> = () => {
                     flexDirection: 'column',
                     gap: '10px',
                     boxShadow: '4px 4px 0px rgba(0,0,0,0.06)',
+                    animation: `fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) ${0.08 + idx * 0.1}s both`,
                   }}
                 >
                   <div style={{ fontSize: '36px' }}>{item.icon}</div>
                   <div style={{ fontSize: '26px', fontWeight: 800, color: '#202124' }}>
                     {item.title}
                   </div>
-                  <div style={{ fontSize: '20px', color: '#666666' }}>
-                    {item.desc}
-                  </div>
+                  <div style={{ fontSize: '20px', color: '#666666' }}>{item.desc}</div>
                 </div>
               ))}
             </div>
@@ -95,6 +95,7 @@ export const Slide02Problem: React.FC<Slide02ProblemProps> = () => {
               flexDirection: 'column',
               gap: '28px',
               boxShadow: '8px 8px 0px rgba(20, 125, 120, 0.15)',
+              animation: 'fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both',
             }}
           >
             <div
@@ -115,8 +116,24 @@ export const Slide02Problem: React.FC<Slide02ProblemProps> = () => {
                 <span>Uncompressed Raster Footprint</span>
                 <span style={{ color: '#D9534F' }}>100% Volume</span>
               </div>
-              <div style={{ width: '100%', height: '36px', backgroundColor: '#EBEBEB', borderRadius: '2px', overflow: 'hidden' }}>
-                <div style={{ width: '100%', height: '100%', backgroundColor: '#D9534F' }} />
+              <div
+                style={{
+                  width: '100%',
+                  height: '36px',
+                  backgroundColor: '#EBEBEB',
+                  borderRadius: '2px',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: '#D9534F',
+                    transformOrigin: 'left center',
+                    animation: 'barGrow 1s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both',
+                  }}
+                />
               </div>
               <div style={{ fontSize: '18px', color: '#777', fontFamily: 'monospace' }}>
                 8 bits &times; 3 or 4 channels per pixel &times; millions of images
@@ -132,6 +149,7 @@ export const Slide02Problem: React.FC<Slide02ProblemProps> = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '8px',
+                animation: 'fadeUp 0.55s ease 0.55s both',
               }}
             >
               <div style={{ fontSize: '22px', fontWeight: 800, color: '#147D78' }}>
@@ -154,6 +172,7 @@ export const Slide02Problem: React.FC<Slide02ProblemProps> = () => {
             color: '#555555',
             fontStyle: 'italic',
             textAlign: 'center',
+            animation: 'fadeIn 0.6s ease 0.65s both',
           }}
         >
           Uncompressed image archives place massive demands on server disk storage and global network bandwidth.

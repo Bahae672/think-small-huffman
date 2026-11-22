@@ -26,10 +26,11 @@ export const Slide06Pseudocode: React.FC<Slide06PseudocodeProps> = ({ step = 0 }
         <div
           style={{
             width: '100%',
-            maxWidth: '1280px',
+            maxWidth: '1320px',
             fontFamily: "'Crimson Pro', 'Latin Modern Math', 'Lora', 'Times New Roman', serif",
             color: '#000000',
             backgroundColor: '#FFFFFF',
+            animation: 'fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both',
           }}
         >
           {/* Top Thin Black Horizontal Line */}
@@ -41,22 +42,36 @@ export const Slide06Pseudocode: React.FC<Slide06PseudocodeProps> = ({ step = 0 }
               padding: '14px 0 12px 0',
               display: 'flex',
               alignItems: 'baseline',
+              justifyContent: 'space-between',
               fontSize: '32px',
             }}
           >
-            <span style={{ fontWeight: 700, marginRight: '12px' }}>
-              Algorithm 1
-            </span>
+            <div>
+              <span style={{ fontWeight: 700, marginRight: '12px' }}>Algorithm 1</span>
+              <span
+                style={{
+                  fontVariant: 'small-caps',
+                  fontWeight: 700,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Huffman
+              </span>
+              <span style={{ fontStyle: 'italic', marginLeft: '4px' }}>(C)</span>
+            </div>
             <span
               style={{
-                fontVariant: 'small-caps',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '16px',
                 fontWeight: 700,
-                letterSpacing: '0.04em',
+                color: '#147D78',
+                backgroundColor: '#E6F4F3',
+                padding: '4px 12px',
+                borderRadius: '4px',
               }}
             >
-              Huffman
+              Step {step} / 2
             </span>
-            <span style={{ fontStyle: 'italic', marginLeft: '4px' }}>(C)</span>
           </div>
 
           {/* Thick Black Horizontal Line Directly Underneath Heading */}
@@ -65,14 +80,14 @@ export const Slide06Pseudocode: React.FC<Slide06PseudocodeProps> = ({ step = 0 }
           {/* Pseudocode Lines Body */}
           <div
             style={{
-              padding: '24px 20px',
+              padding: '22px 20px',
               fontSize: '28px',
-              lineHeight: 2.0,
+              lineHeight: 1.95,
               letterSpacing: '0.01em',
             }}
           >
             {/* Line 1 */}
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', padding: '2px 10px' }}>
               <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: '#555555' }}>
                 1:
               </span>
@@ -82,7 +97,7 @@ export const Slide06Pseudocode: React.FC<Slide06PseudocodeProps> = ({ step = 0 }
             </div>
 
             {/* Line 2 */}
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', padding: '2px 10px' }}>
               <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: '#555555' }}>
                 2:
               </span>
@@ -92,17 +107,17 @@ export const Slide06Pseudocode: React.FC<Slide06PseudocodeProps> = ({ step = 0 }
             </div>
 
             {/* Line 3 */}
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', padding: '2px 10px' }}>
               <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: '#555555' }}>
                 3:
               </span>
               <span>
-                <strong>for</strong> <span style={{ fontStyle: 'italic' }}>i</span> := 1 <strong>to</strong> <span style={{ fontStyle: 'italic' }}>n</span> − 1 <strong>do</strong>
+                <strong>for</strong> <span style={{ fontStyle: 'italic' }}>i</span> := 1 <strong>to</strong> <span style={{ fontStyle: 'italic' }}>n</span> &minus; 1 <strong>do</strong>
               </span>
             </div>
 
             {/* Line 4 */}
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', padding: '2px 10px' }}>
               <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: '#555555' }}>
                 4:
               </span>
@@ -115,58 +130,146 @@ export const Slide06Pseudocode: React.FC<Slide06PseudocodeProps> = ({ step = 0 }
             <div
               style={{
                 display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '2px 14px 2px 10px',
                 backgroundColor: step >= 1 ? '#EBF7F6' : 'transparent',
+                borderLeft: step >= 1 ? '5px solid #147D78' : '5px solid transparent',
                 borderRadius: '2px',
-                transition: 'background-color 0.3s ease',
+                transition: 'all 0.35s ease',
               }}
             >
-              <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: step >= 1 ? '#147D78' : '#555555', fontWeight: step >= 1 ? 700 : 400 }}>
-                5:
-              </span>
-              <span style={{ paddingLeft: '48px', color: step >= 1 ? '#147D78' : '#000000', fontWeight: step >= 1 ? 600 : 400 }}>
-                <span style={{ fontStyle: 'italic' }}>z</span>.<span style={{ fontStyle: 'italic' }}>left</span> := <span style={{ fontStyle: 'italic' }}>x</span> := <span style={{ fontVariant: 'small-caps' }}>Extract-Min</span>(<span style={{ fontStyle: 'italic' }}>Q</span>);
-              </span>
+              <div style={{ display: 'flex' }}>
+                <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: step >= 1 ? '#147D78' : '#555555', fontWeight: step >= 1 ? 700 : 400 }}>
+                  5:
+                </span>
+                <span style={{ paddingLeft: '48px', color: step >= 1 ? '#147D78' : '#000000', fontWeight: step >= 1 ? 700 : 400 }}>
+                  <span style={{ fontStyle: 'italic' }}>z</span>.<span style={{ fontStyle: 'italic' }}>left</span> := <span style={{ fontStyle: 'italic' }}>x</span> := <span style={{ fontVariant: 'small-caps' }}>Extract-Min</span>(<span style={{ fontStyle: 'italic' }}>Q</span>);
+                </span>
+              </div>
+              {step >= 1 && (
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: '#147D78',
+                    animation: 'fadeIn 0.35s ease both',
+                  }}
+                >
+                  &larr; Greedy Choice (1st Minimum)
+                </span>
+              )}
             </div>
 
             {/* Line 6 (GREEDY CHOICE) */}
             <div
               style={{
                 display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '2px 14px 2px 10px',
                 backgroundColor: step >= 1 ? '#EBF7F6' : 'transparent',
+                borderLeft: step >= 1 ? '5px solid #147D78' : '5px solid transparent',
                 borderRadius: '2px',
-                transition: 'background-color 0.3s ease',
+                transition: 'all 0.35s ease',
               }}
             >
-              <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: step >= 1 ? '#147D78' : '#555555', fontWeight: step >= 1 ? 700 : 400 }}>
-                6:
-              </span>
-              <span style={{ paddingLeft: '48px', color: step >= 1 ? '#147D78' : '#000000', fontWeight: step >= 1 ? 600 : 400 }}>
-                <span style={{ fontStyle: 'italic' }}>z</span>.<span style={{ fontStyle: 'italic' }}>right</span> := <span style={{ fontStyle: 'italic' }}>y</span> := <span style={{ fontVariant: 'small-caps' }}>Extract-Min</span>(<span style={{ fontStyle: 'italic' }}>Q</span>);
-              </span>
+              <div style={{ display: 'flex' }}>
+                <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: step >= 1 ? '#147D78' : '#555555', fontWeight: step >= 1 ? 700 : 400 }}>
+                  6:
+                </span>
+                <span style={{ paddingLeft: '48px', color: step >= 1 ? '#147D78' : '#000000', fontWeight: step >= 1 ? 700 : 400 }}>
+                  <span style={{ fontStyle: 'italic' }}>z</span>.<span style={{ fontStyle: 'italic' }}>right</span> := <span style={{ fontStyle: 'italic' }}>y</span> := <span style={{ fontVariant: 'small-caps' }}>Extract-Min</span>(<span style={{ fontStyle: 'italic' }}>Q</span>);
+                </span>
+              </div>
+              {step >= 1 && (
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: '#147D78',
+                    animation: 'fadeIn 0.35s ease both',
+                  }}
+                >
+                  &larr; Greedy Choice (2nd Minimum)
+                </span>
+              )}
             </div>
 
             {/* Line 7 */}
-            <div style={{ display: 'flex' }}>
-              <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: '#555555' }}>
-                7:
-              </span>
-              <span style={{ paddingLeft: '48px' }}>
-                <span style={{ fontStyle: 'italic' }}>z</span>.<span style={{ fontStyle: 'italic' }}>freq</span> := <span style={{ fontStyle: 'italic' }}>x</span>.<span style={{ fontStyle: 'italic' }}>freq</span> + <span style={{ fontStyle: 'italic' }}>y</span>.<span style={{ fontStyle: 'italic' }}>freq</span>;
-              </span>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '2px 14px 2px 10px',
+                backgroundColor: step >= 2 ? '#F5F7F7' : 'transparent',
+                borderLeft: step >= 2 ? '5px solid #202124' : '5px solid transparent',
+                transition: 'all 0.35s ease',
+              }}
+            >
+              <div style={{ display: 'flex' }}>
+                <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: '#555555' }}>
+                  7:
+                </span>
+                <span style={{ paddingLeft: '48px', fontWeight: step >= 2 ? 700 : 400 }}>
+                  <span style={{ fontStyle: 'italic' }}>z</span>.<span style={{ fontStyle: 'italic' }}>freq</span> := <span style={{ fontStyle: 'italic' }}>x</span>.<span style={{ fontStyle: 'italic' }}>freq</span> + <span style={{ fontStyle: 'italic' }}>y</span>.<span style={{ fontStyle: 'italic' }}>freq</span>;
+                </span>
+              </div>
+              {step >= 2 && (
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: '#444444',
+                    animation: 'fadeIn 0.35s ease both',
+                  }}
+                >
+                  &larr; Combine Frequencies
+                </span>
+              )}
             </div>
 
             {/* Line 8 */}
-            <div style={{ display: 'flex' }}>
-              <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: '#555555' }}>
-                8:
-              </span>
-              <span style={{ paddingLeft: '48px' }}>
-                <span style={{ fontVariant: 'small-caps' }}>Insert</span>(<span style={{ fontStyle: 'italic' }}>Q</span>, <span style={{ fontStyle: 'italic' }}>z</span>);
-              </span>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '2px 14px 2px 10px',
+                backgroundColor: step >= 2 ? '#F5F7F7' : 'transparent',
+                borderLeft: step >= 2 ? '5px solid #202124' : '5px solid transparent',
+                transition: 'all 0.35s ease',
+              }}
+            >
+              <div style={{ display: 'flex' }}>
+                <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: '#555555' }}>
+                  8:
+                </span>
+                <span style={{ paddingLeft: '48px', fontWeight: step >= 2 ? 700 : 400 }}>
+                  <span style={{ fontVariant: 'small-caps' }}>Insert</span>(<span style={{ fontStyle: 'italic' }}>Q</span>, <span style={{ fontStyle: 'italic' }}>z</span>);
+                </span>
+              </div>
+              {step >= 2 && (
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: '#444444',
+                    animation: 'fadeIn 0.35s ease both',
+                  }}
+                >
+                  &larr; Reinsert Composite Node
+                </span>
+              )}
             </div>
 
             {/* Line 9 */}
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', padding: '2px 10px' }}>
               <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: '#555555' }}>
                 9:
               </span>
@@ -179,15 +282,18 @@ export const Slide06Pseudocode: React.FC<Slide06PseudocodeProps> = ({ step = 0 }
             <div
               style={{
                 display: 'flex',
-                backgroundColor: step >= 2 ? '#F5F5F5' : 'transparent',
+                padding: '2px 10px',
+                backgroundColor: step >= 2 ? '#EBF7F6' : 'transparent',
+                borderLeft: step >= 2 ? '5px solid #147D78' : '5px solid transparent',
                 borderRadius: '2px',
+                transition: 'all 0.35s ease',
               }}
             >
               <span style={{ width: '60px', textAlign: 'right', marginRight: '32px', userSelect: 'none', color: '#555555' }}>
                 10:
               </span>
-              <span>
-                <strong>return</strong> <span style={{ fontVariant: 'small-caps' }}>Extract-Min</span>(<span style={{ fontStyle: 'italic' }}>Q</span>); <span style={{ color: '#555555', fontStyle: 'italic', marginLeft: '24px' }}>&#123;return the root of the tree&#125;</span>
+              <span style={{ fontWeight: step >= 2 ? 700 : 400 }}>
+                <strong>return</strong> <span style={{ fontVariant: 'small-caps' }}>Extract-Min</span>(<span style={{ fontStyle: 'italic' }}>Q</span>); <span style={{ color: '#555555', fontStyle: 'italic', marginLeft: '24px', fontWeight: 400 }}>&#123;return the root of the tree&#125;</span>
               </span>
             </div>
           </div>

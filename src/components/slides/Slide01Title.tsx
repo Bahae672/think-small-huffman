@@ -13,6 +13,7 @@ export const Slide01Title: React.FC<Slide01TitleProps> = () => {
         height: '1080px',
         backgroundColor: '#FFFFFF',
         color: '#202124',
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',

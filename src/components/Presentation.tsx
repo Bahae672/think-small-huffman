@@ -23,20 +23,20 @@ const MAX_STEPS: { [slideNumber: number]: number } = {
   4: 1,
   5: 1,
   6: 2,
-  7: 5, // Step 0 (Initial 6 nodes) through Step 5 (Final root & codes)
+  7: 6, // Step 0 (Queue) -> Step 1 (Align leaves) -> Steps 2..6 (5 greedy merges & final codes)
   8: 0, // Single boxed equation + 4 formal definitions
   9: 2, // 3 proof cards (0, 1, 2)
-  10: 4, // Step 0: Input -> Step 1: Fixed -> Step 2: Shannon-Fano -> Step 3: Huffman -> Step 4: Comparison chart
-  11: 2, // Step 0: Operations table -> Step 1: Total Time -> Step 2: Auxiliary Space
-  12: 1, // Step 0: Base comparative graph -> Step 1: 32x callout bracket
-  13: 0, // Autonomous continuous fluid metamorphosis on one slide
+  10: 3, // Step 0: 13-Symbol Stream -> Step 1: Fixed-Length -> Step 2: Shannon-Fano -> Step 3: Huffman Optimal
+  11: 2, // Step 0: 3-Stage Pipeline -> Step 1: Total Time -> Step 2: Extra Memory
+  12: 1, // Step 0: Animated Growth Curves -> Step 1: 32x Faster Gap Bracket
+  13: 6, // Steps 0..6: Image -> Pixels -> Values -> Frequencies -> Huffman Tree -> Binary Bits -> Reconstructed PNG
   14: 0, // Thank You
 };
 
 // Inject global keyframes once at module level
 const GLOBAL_CSS = `
   @keyframes slideEntrance {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
   }
   @keyframes fadeUp {
@@ -48,16 +48,42 @@ const GLOBAL_CSS = `
     to   { opacity: 1; }
   }
   @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.96); }
+    from { opacity: 0; transform: scale(0.94); }
     to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes barGrow {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+  @keyframes drawCurve {
+    from { stroke-dashoffset: 1600; }
+    to   { stroke-dashoffset: 0; }
+  }
+  @keyframes drawLine {
+    from { stroke-dashoffset: 240; }
+    to   { stroke-dashoffset: 0; }
+  }
+  @keyframes drawEdgeUp {
+    from { stroke-dashoffset: var(--edge-len, 180); opacity: 0.25; }
+    to   { stroke-dashoffset: 0; opacity: 1; }
+  }
+  @keyframes nodePopIn {
+    0%   { opacity: 0; transform: scale(0.55); }
+    70%  { opacity: 1; transform: scale(1.06); }
+    100% { opacity: 1; transform: scale(1); }
   }
 `;
 
-if (typeof document !== 'undefined' && !document.getElementById('agy-anim-css')) {
-  const style = document.createElement('style');
-  style.id = 'agy-anim-css';
-  style.textContent = GLOBAL_CSS;
-  document.head.appendChild(style);
+if (typeof document !== 'undefined') {
+  const existing = document.getElementById('agy-anim-css');
+  if (existing) {
+    existing.textContent = GLOBAL_CSS;
+  } else {
+    const style = document.createElement('style');
+    style.id = 'agy-anim-css';
+    style.textContent = GLOBAL_CSS;
+    document.head.appendChild(style);
+  }
 }
 
 export const Presentation: React.FC = () => {
@@ -122,7 +148,19 @@ export const Presentation: React.FC = () => {
         return;
       }
 
-      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      if ((e.key === 'ArrowRight' && e.shiftKey) || e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (currentSlide < totalSlides) {
+          setCurrentSlide((c) => c + 1);
+          setSlideStep(0);
+        }
+      } else if ((e.key === 'ArrowLeft' && e.shiftKey) || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (currentSlide > 1) {
+          setCurrentSlide((c) => c - 1);
+          setSlideStep(0);
+        }
+      } else if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
         e.preventDefault();
         advanceStepOrSlide();
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
@@ -237,6 +275,37 @@ export const Presentation: React.FC = () => {
           }}
         >
           {renderSlideContent()}
+        </div>
+
+        {/* Persistent Bottom Progress Hairline (Smoothly advances across slides & sub-steps) */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            width: '100%',
+            height: '5px',
+            backgroundColor: '#EFEFEF',
+            zIndex: 50,
+            pointerEvents: 'none',
+          }}
+        >
+          <div
+            style={{
+              width: `${Math.min(
+                100,
+                Math.max(
+                  0,
+                  (((currentSlide - 1) + (slideStep + 1) / ((MAX_STEPS[currentSlide] || 0) + 1)) /
+                    totalSlides) *
+                    100
+                )
+              )}%`,
+              height: '100%',
+              backgroundColor: '#147D78',
+              transition: 'width 0.48s cubic-bezier(0.22, 1, 0.36, 1)',
+            }}
+          />
         </div>
       </div>
 
