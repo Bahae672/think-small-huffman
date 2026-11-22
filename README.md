@@ -8,103 +8,165 @@
 
 ---
 
-## 1. Quick Start: How to Run the Presentation
+## 1. How to Host This Presentation on Vercel (100% Free)
+
+You can host this project on **Vercel** for free using either **Method A (GitHub + Vercel Website — Recommended)** or **Method B (Direct Terminal Upload via Vercel CLI)**.
+
+### Step 0: Add Your Example Images First
+Before deploying, place all the example images you want available during your live demo inside:
+```text
+c:\Projects\think_small\src\examples\
+```
+* Supported formats: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`, `.bmp`, `.svg`.
+* Every image inside `src/examples/` is **automatically bundled** into the **`📁 Examples Folder`** popup on Slide 13 and will be accessible on any computer when you open your Vercel link.
+
+---
+
+### Method A: Deploy via GitHub & Vercel Dashboard (Recommended)
+
+This method gives you a permanent URL (e.g., `https://think-small-huffman.vercel.app`) that automatically updates whenever you push new images or changes.
+
+#### Step 1 — Create a Free GitHub Repository
+1. Go to [https://github.com/new](https://github.com/new) and sign in.
+2. Under **Repository name**, type `think-small-huffman`.
+3. Choose **Public** (or **Private** — both work for free on Vercel).
+4. Leave *"Add a README file"* unchecked and click **Create repository**.
+
+#### Step 2 — Push Your Project from Your Computer to GitHub
+Open PowerShell or your terminal inside `c:\Projects\think_small` and run these commands one by one:
+
+```powershell
+# 1. Initialize Git in the project folder (if not already initialized)
+git init
+
+# 2. Stage all project files (including src/examples/)
+git add .
+
+# 3. Create your first commit
+git commit -m "Initial commit: Huffman Coding presentation"
+
+# 4. Set the main branch name
+git branch -M main
+
+# 5. Link to your GitHub repository (replace YOUR_GITHUB_USERNAME with your username)
+git remote add origin https://github.com/YOUR_GITHUB_USERNAME/think-small-huffman.git
+
+# 6. Upload the project to GitHub
+git push -u origin main
+```
+
+#### Step 3 — Connect GitHub to Vercel (Free Hobby Plan)
+1. Go to [https://vercel.com/signup](https://vercel.com/signup) and click **Continue with GitHub**.
+2. Once logged into your Vercel Dashboard, click **Add New...** $\to$ **Project**.
+3. Find `think-small-huffman` in your repository list and click **Import**.
+4. Verify the build settings (Vercel detects Vite automatically):
+   * **Framework Preset:** `Vite`
+   * **Build Command:** `npm run build`
+   * **Output Directory:** `dist`
+5. Click **Deploy**.
+6. Wait ~30 seconds. Vercel will give you your live presentation link (e.g., `https://think-small-huffman.vercel.app`).
+
+#### How to Add More Example Images Later (Method A)
+Whenever you add or remove images in `c:\Projects\think_small\src\examples\`, run:
+```powershell
+git add .
+git commit -m "Add new example images"
+git push
+```
+Vercel will automatically rebuild and update your live website in ~20 seconds.
+
+---
+
+### Method B: Deploy Directly from Terminal (No GitHub Required)
+
+If you don't want to use GitHub, you can upload the project straight from PowerShell using the official Vercel CLI:
+
+#### Step 1 — Create a Free Account on Vercel
+Sign up at [https://vercel.com/signup](https://vercel.com/signup).
+
+#### Step 2 — Run the Vercel CLI from Your Project Folder
+Open PowerShell in `c:\Projects\think_small` and run:
+
+```powershell
+# 1. Log in to Vercel in your terminal (opens browser confirmation)
+npx vercel login
+
+# 2. Deploy straight to Production
+npx vercel --prod
+```
+
+When prompted by the CLI for the first time, press **Enter** to accept the default answers:
+* *Set up and deploy `C:\Projects\think_small`?* $\to$ **`Y`**
+* *Which scope do you want to deploy to?* $\to$ Press **Enter** (your personal account)
+* *Link to existing project?* $\to$ **`N`**
+* *What’s your project’s name?* $\to$ **`think-small-huffman`** (Press **Enter**)
+* *In which directory is your code located?* $\to$ **`./`** (Press **Enter**)
+* *Want to modify these settings?* $\to$ **`N`** (Press **Enter**)
+
+Once finished (~30 seconds), the terminal will print your live **`Production: https://...vercel.app`** link!
+
+#### How to Update Later (Method B)
+If you add more images to `src/examples/` later, just run:
+```powershell
+npx vercel --prod
+```
+
+---
+
+## 2. Running Locally on Your Computer
 
 ### Prerequisites
 - Node.js (version 18 or higher recommended)
-- npm or pnpm
+- npm
 
-### Installation & Development Server
-```bash
-# Clone or navigate to the project directory
-cd think_small
-
-# Install dependencies
+### Development Server
+```powershell
+cd c:\Projects\think_small
 npm install
-
-# Start the local development server with Hot Module Replacement
 npm run dev
 ```
-Open your browser at `http://localhost:5173/` to view the presentation.
+Open `http://localhost:3000/` (or the port printed in the terminal).
 
 ### Production Build & Preview
-To run the high-performance production build:
-```bash
+```powershell
 npm run build
-npm run preview
+npm run preview -- --port 4173
 ```
-This builds optimized bundles in `dist/` and hosts a local preview at `http://localhost:4173/`.
+Open `http://localhost:4173/`.
 
 ---
 
-## 2. Presentation Navigation & Keyboard Shortcuts
+## 3. Presentation Navigation & Keyboard Shortcuts
 
-The presentation runs at a logical **1920 × 1080** resolution, automatically scaled to fit any browser window or projector screen with zero distortion.
+The presentation runs at a logical **1920 × 1080** resolution, automatically scaled to fit any browser window or classroom projector without distortion.
 
 | Key / Action | Function |
-|---|---|
-| `Space` or `→` or `PageDown` | Advance to the next animation step or slide |
-| `←` or `PageUp` | Return to the previous animation step or slide |
+| :--- | :--- |
+| `Space` / `→` / `PageDown` / `Click` | Advance to the next animation step or slide |
+| `←` / `PageUp` | Return to the previous animation step or slide |
+| `↓` or `Shift + →` | Fast-skip directly to the next slide (great for Q&A) |
+| `↑` or `Shift + ←` | Fast-skip directly to the previous slide (great for Q&A) |
 | `Home` / `End` | Jump to Slide 1 (Title) / Slide 14 (Thank You) |
 | `F` | Toggle Fullscreen mode |
-| `S` or `N` | Toggle Presenter Speaker Notes Drawer (with slide jumper) |
-| Click on background | Advance to the next animation step or slide |
-
-> **Note:** The UI contains only a minimal header (course title and slide counter), keeping the canvas free from clutter to ensure a clean academic conference aesthetic.
+| `S` or `N` | Toggle Presenter Lecture Script & Slide Jumper Drawer |
 
 ---
 
-## 3. Slide Deck Architecture (14 Slides)
+## 4. Slide Deck Architecture & 15-Minute Pacing Plan
 
-1. **Slide 1: Title & Presenters**
-   - Clean, minimalistic academic conference title slide with the square NJUPT university emblem, presentation title, subtitle, course, and presenters (**Bahaeddine EL ATIGUI** & **Hafssa GAMMAZ**).
-2. **Slide 2: The Growing Cost of Digital Images**
-   - Real-world motivation: High-contrast academic graphics, diagrams, and UI assets accumulating into massive byte volumes and bandwidth bottlenecks.
-3. **Slide 3: The Fundamental Question**
-   - *"Can we reduce the amount of data while preserving every original pixel?"*
-   - Clear visual pipeline: `ORIGINAL IMAGE → COMPRESSION → RECONSTRUCTED IMAGE`, highlighting Lossless Compression.
-4. **Slide 4: Huffman Coding in PNG**
-   - Architectural context within the DEFLATE standard: Filtering $\to$ LZ77 $\to$ **Huffman Entropy Coding** $\to$ Bitstream.
-5. **Slide 5: The Greedy Choice**
-   - The central greedy heuristic: *Repeatedly combine the two symbols with the lowest frequencies*. 6-symbol frequency distribution.
-6. **Slide 6: Algorithm 1 — Huffman(C) Pseudocode**
-   - Formal CLRS pseudocode with min-priority queue operations and progressive highlighting.
-7. **Slide 7: Constructing the Huffman Tree**
-   - Animated step-by-step min-heap merges (Steps 0–5) with geometric edge clipping terminating strictly at node circumferences without crossing node centers or labels.
-8. **Slide 8: Mathematical Formulation**
-   - Boxed theorem:
-     $$\bar{L}_{\mathrm{Huffman}} = \min_{\text{prefix codes}} \sum_{i=1}^k p_i l_i$$
-     With exact definitions of $\bar{L}$, $p_i$, $l_i$, and alphabet size $k$.
-9. **Slide 9: Why Does the Greedy Algorithm Work?**
-   - 3-pillar proof structure: Greedy-Choice Property (exchange argument), Reduction, and Optimal Substructure.
-10. **Slide 10: Huffman Coding vs. Alternative Approaches**
-    - Rigorous benchmark on an integer frequency distribution: A: 5, B: 2, C: 2, D: 2, E: 2 ($N = 13$).
-    - Comparison: Fixed-Length (3.00 b/sym), Shannon-Fano (2.31 b/sym), Huffman (2.23 b/sym).
-    - Large comparison bar chart (~60% of slide) highlighting Huffman's global optimality.
-11. **Slide 11: Computational Complexity — Big-O Analysis**
-    - Operation breakdown: $O(N)$ frequency tally, $O(k)$ heap build, $O(k \log k)$ greedy merges, $O(k)$ tree traversal $\to O(N + k \log k)$ total time, $O(k)$ auxiliary space.
-12. **Slide 12: Why Use a Priority Queue?**
-    - Large comparison graph (~75% of slide) contrasting Min-Heap $O(k \log k)$ vs. Naive Array Scan $O(k^2)$ ($32\times$ speedup at $k = 256$).
-13. **Slide 13: Interactive Live Demonstration**
-    - Single-slide continuous fluid visual metamorphosis:
-      $$\text{IMAGE} \longrightarrow \text{PIXELS} \longrightarrow \text{NUMBERS} \longrightarrow \text{HUFFMAN TREE} \longrightarrow \text{BINARY DATA} \longrightarrow \text{RECONSTRUCTED IMAGE}$$
-    - Genuine byte-by-byte reconstruction with bit-exact validation (`PASS: 0 Byte Differences`).
-14. **Slide 14: Thank You**
-    - Ultra-minimalist closing slide featuring:
-      - `# Thank You`
-      - `*"Small choices can lead to optimal solutions."*`
-
----
-
-## 4. How the Interactive Live Demonstration Works
-
-On **Slide 13**, the entire demonstration flows in **one continuous visual metamorphosis** on a single slide:
-
-1. **Standby / Ready:** Displays an initial prompt to begin compressing an image, with an option to upload any custom PNG/JPEG.
-2. **Phase 1 — Source Image Display:** The image is introduced in high resolution.
-3. **Phase 2 — Visible Pixel Grid:** The image smoothly transitions into an $8 \times 8$ magnified grid of discrete pixels.
-4. **Phase 3 — Numerical Values:** Each pixel dissolves into its underlying numerical byte values (e.g. RGBA channels $[0 \dots 255]$).
-5. **Phase 4 — Frequency Organizers:** The byte values group into an empirical frequency ranking.
-6. **Phase 5 — Greedy Merges:** The greedy algorithm step-by-step extracts the two lowest frequencies and fuses them into a binary Huffman tree.
-7. **Phase 6 — Binary Bitstream:** Traversal generates variable-length bit codewords (`0` and `1`), showing dense bitstream packing.
-8. **Phase 7 — Exact Lossless Reconstruction:** The bitstream is decoded back into the original image, displaying a side-by-side verification confirming $100\%$ byte-exact equivalence.
+| Slide | Title | Target Time | Elapsed |
+| :---: | :--- | :---: | :---: |
+| **1** | **Think Small: How Greedy Algorithms Compress Images** | `0:30` | `0:00 – 0:30` |
+| **2** | **The Growing Cost of Digital Images** | `0:50` | `0:30 – 1:20` |
+| **3** | **The Fundamental Question** | `0:40` | `1:20 – 2:00` |
+| **4** | **Huffman Coding in PNG** | `1:00` | `2:00 – 3:00` |
+| **5** | **The Greedy Choice** | `1:15` | `3:00 – 4:15` |
+| **6** | **Algorithm 1 — Huffman(C) Pseudocode** | `1:15` | `4:15 – 5:30` |
+| **7** | **Constructing the Huffman Tree (Steps 0–6)** | `2:00` | `5:30 – 7:30` *(Halfway Point)* |
+| **8** | **Mathematical Formulation** | `0:50` | `7:30 – 8:20` |
+| **9** | **Why Does the Greedy Algorithm Work? (Exchange Argument)** | `1:10` | `8:20 – 9:30` |
+| **10** | **Why Huffman Beats Other Approaches (Visual Bitstream)** | `1:30` | `9:30 – 11:00` |
+| **11** | **Computational Complexity — Big-O Analysis** | `1:00` | `11:00 – 12:00` |
+| **12** | **Why Use a Priority Queue? (Animated Growth Graph)** | `0:45` | `12:00 – 12:45` |
+| **13** | **Live Demonstration: From Image to PNG (Steps 1–7)** | `1:45` | `12:45 – 14:30` |
+| **14** | **Thank You** | `0:30` | `14:30 – 15:00` |

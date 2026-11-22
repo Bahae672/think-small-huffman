@@ -3,6 +3,31 @@ import { SlideLayout } from '../SlideLayout';
 import { PriorityQueue } from '../../utils/priorityQueue';
 import { HuffmanNode, HuffmanCodeMap } from '../../types';
 
+// Automatically bundle and discover every image placed inside src/examples/
+const bundledExampleFiles = import.meta.glob(
+  '/src/examples/*.{png,jpg,jpeg,webp,gif,bmp,svg,PNG,JPG,JPEG,WEBP}',
+  { eager: true, import: 'default' }
+) as Record<string, string>;
+
+interface ExampleFolderItem {
+  id: string;
+  name: string;
+  url: string;
+  tag: string;
+}
+
+const FOLDER_EXAMPLES: ExampleFolderItem[] = Object.entries(bundledExampleFiles).map(
+  ([filePath, resolvedUrl]) => {
+    const baseName = filePath.split('/').pop() || 'example.png';
+    return {
+      id: filePath,
+      name: baseName,
+      url: resolvedUrl,
+      tag: 'src/examples/',
+    };
+  }
+);
+
 interface SampleCell {
   r: number;
   g: number;
@@ -120,6 +145,7 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
   const [subStep, setSubStep] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [activePreset, setActivePreset] = useState<PresetId>('diagram');
+  const [showFolderModal, setShowFolderModal] = useState<boolean>(false);
   const [data, setData] = useState<RealCompressionData | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -154,8 +180,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
 
     const rgbBytes = new Uint8Array(totalPixels * 3);
     const freqs = new Uint32Array(256);
-
-    // Track representative RGB color for each byte value (0..255)
     const colorRgbForByte: Record<number, { r: number; g: number; b: number }> = {};
 
     for (let i = 0; i < totalPixels; i++) {
@@ -343,6 +367,23 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
     });
   }, []);
 
+  // Load any image URL from the Examples Folder
+  const loadExampleFromUrl = useCallback(
+    (url: string, name: string) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        setActivePreset('custom');
+        processRealImage(img, name);
+        setShowFolderModal(false);
+        setIsPlaying(false);
+        setStage(0);
+      };
+      img.src = url;
+    },
+    [processRealImage, setStage]
+  );
+
   // Built-in Quick-Select Presets
   const loadPreset = useCallback(
     (preset: PresetId) => {
@@ -376,13 +417,11 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
       }
 
       if (preset === 'gradient') {
-        // High-resolution smooth scenic landscape illustration (NOT pixelated!)
         const c = document.createElement('canvas');
         c.width = 240;
         c.height = 240;
         const ctx = c.getContext('2d')!;
 
-        // 1. Smooth sunset/sky vertical gradient
         const skyGrad = ctx.createLinearGradient(0, 0, 0, 155);
         skyGrad.addColorStop(0, '#134E5E');
         skyGrad.addColorStop(0.55, '#71B280');
@@ -390,7 +429,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, 240, 155);
 
-        // 2. Smooth glowing sun
         const sunGrad = ctx.createRadialGradient(170, 72, 6, 170, 72, 46);
         sunGrad.addColorStop(0, '#FFFDF0');
         sunGrad.addColorStop(0.45, '#FDE08D');
@@ -400,7 +438,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
         ctx.arc(170, 72, 46, 0, Math.PI * 2);
         ctx.fill();
 
-        // 3. Distant mountain range (soft teal-slate silhouette)
         ctx.fillStyle = '#2C5E63';
         ctx.beginPath();
         ctx.moveTo(0, 155);
@@ -412,7 +449,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
         ctx.closePath();
         ctx.fill();
 
-        // 4. Foreground mountain range (deep charcoal-teal)
         ctx.fillStyle = '#18363A';
         ctx.beginPath();
         ctx.moveTo(0, 160);
@@ -425,7 +461,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
         ctx.closePath();
         ctx.fill();
 
-        // 5. Calm lake reflection gradient at bottom
         const lakeGrad = ctx.createLinearGradient(0, 155, 0, 240);
         lakeGrad.addColorStop(0, '#D4B56A');
         lakeGrad.addColorStop(0.4, '#3B7A78');
@@ -433,7 +468,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
         ctx.fillStyle = lakeGrad;
         ctx.fillRect(0, 155, 240, 85);
 
-        // 6. Subtle water shimmer lines
         ctx.fillStyle = 'rgba(255, 253, 240, 0.35)';
         for (let i = 0; i < 6; i++) {
           const y = 166 + i * 11;
@@ -447,7 +481,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
         return;
       }
 
-      // Default: 'diagram' (High-contrast academic diagram rendered at crisp 240x240)
       const c = document.createElement('canvas');
       c.width = 240;
       c.height = 240;
@@ -473,7 +506,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
     loadPreset('diagram');
   }, [loadPreset]);
 
-  // Sub-step animations within Stage 4 (Huffman Tree) and Stage 6 (Reconstructed PNG)
   useEffect(() => {
     setSubStep(0);
 
@@ -523,6 +555,7 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
       img.onload = () => {
         setActivePreset('custom');
         processRealImage(img, file.name);
+        setShowFolderModal(false);
         setStage(0);
       };
       img.src = ev.target?.result as string;
@@ -558,6 +591,7 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
           height: '100%',
           justifyContent: 'space-between',
           userSelect: 'none',
+          position: 'relative',
         }}
       >
         {/* Top Interactive Stepper & Quick-Select Preset Bar */}
@@ -608,7 +642,7 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
             })}
           </div>
 
-          {/* Quick-Select Preset Bar + Auto-Play */}
+          {/* Quick-Select Preset Bar + Examples Folder Modal Trigger + Auto-Play */}
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <input
               ref={fileInputRef}
@@ -632,7 +666,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
             >
               {[
                 { id: 'diagram' as PresetId, label: '📐 Diagram' },
-                { id: 'emblem' as PresetId, label: '🏛️ NJUPT Emblem' },
                 { id: 'gradient' as PresetId, label: '🌄 Multi-Tone' },
               ].map((p) => (
                 <button
@@ -640,6 +673,7 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
                   type="button"
                   onClick={() => {
                     setIsPlaying(false);
+                    setShowFolderModal(false);
                     loadPreset(p.id);
                     setStage(0);
                   }}
@@ -660,19 +694,20 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
               ))}
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => setShowFolderModal((prev) => !prev)}
                 style={{
-                  padding: '5px 11px',
+                  padding: '5px 12px',
                   fontSize: '14px',
-                  fontWeight: activePreset === 'custom' ? 800 : 600,
-                  backgroundColor: activePreset === 'custom' ? '#202124' : '#FFFFFF',
-                  color: activePreset === 'custom' ? '#FFFFFF' : '#202124',
-                  border: '1px solid #CCCCCC',
+                  fontWeight: 700,
+                  backgroundColor: showFolderModal || activePreset === 'custom' ? '#147D78' : '#FFFFFF',
+                  color: showFolderModal || activePreset === 'custom' ? '#FFFFFF' : '#202124',
+                  border: '1.5px solid #147D78',
                   borderRadius: '3px',
                   cursor: 'pointer',
+                  transition: 'all 0.2s ease',
                 }}
               >
-                📁 Upload...
+                📁 Examples Folder
               </button>
             </div>
 
@@ -701,6 +736,183 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
             </button>
           </div>
         </div>
+
+        {/* ================= IN-APP EXAMPLES FOLDER MODAL (Works on Vercel from any computer!) ================= */}
+        {showFolderModal && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowFolderModal(false);
+            }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: 'rgba(32, 33, 36, 0.45)',
+              zIndex: 100,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              animation: 'fadeIn 0.2s ease both',
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '880px',
+                maxHeight: '560px',
+                backgroundColor: '#FFFFFF',
+                border: '3px solid #202124',
+                boxShadow: '14px 14px 0px rgba(20, 125, 120, 0.28)',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                animation: 'scaleIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both',
+              }}
+            >
+              {/* Modal Header */}
+              <div
+                style={{
+                  padding: '18px 28px',
+                  backgroundColor: '#F8F9FA',
+                  borderBottom: '2px solid #202124',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '23px', fontWeight: 800, color: '#202124' }}>
+                    📁 Project Examples Folder (<span style={{ fontFamily: 'monospace', color: '#147D78' }}>src/examples/</span>)
+                  </div>
+                  <div style={{ fontSize: '15px', color: '#666666', marginTop: '2px' }}>
+                    Bundled directly with your Vercel deployment — accessible on any computer in one click.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowFolderModal(false)}
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '2px solid #202124',
+                    width: '36px',
+                    height: '36px',
+                    fontSize: '18px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                  }}
+                >
+                  &times;
+                </button>
+              </div>
+
+              {/* Thumbnail Grid */}
+              <div
+                style={{
+                  padding: '24px 28px',
+                  overflowY: 'auto',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '20px',
+                }}
+              >
+                {FOLDER_EXAMPLES.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => loadExampleFromUrl(item.url, item.name)}
+                    style={{
+                      backgroundColor: '#FAFAFA',
+                      border: data.name === item.name ? '3px solid #147D78' : '2px solid #DCDCDC',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '12px',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '140px',
+                        height: '140px',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #E5E5E5',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '8px',
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      <img
+                        src={item.url}
+                        alt={item.name}
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          objectFit: 'contain',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <div
+                        style={{
+                          fontSize: '16px',
+                          fontWeight: 800,
+                          color: '#202124',
+                          fontFamily: 'monospace',
+                          wordBreak: 'break-all',
+                        }}
+                      >
+                        {item.name}
+                      </div>
+                      <div style={{ fontSize: '13px', color: '#147D78', fontWeight: 700, marginTop: '2px' }}>
+                        Click to Compress &rarr;
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Modal Footer: Local Device Fallback */}
+              <div
+                style={{
+                  padding: '14px 28px',
+                  backgroundColor: '#F8F9FA',
+                  borderTop: '1px solid #E0E0E0',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span style={{ fontSize: '15px', color: '#666666' }}>
+                  Tip: Drop any <code style={{ fontFamily: 'monospace', color: '#202124' }}>.png</code>,{' '}
+                  <code style={{ fontFamily: 'monospace', color: '#202124' }}>.jpg</code>, or{' '}
+                  <code style={{ fontFamily: 'monospace', color: '#202124' }}>.webp</code> into{' '}
+                  <code style={{ fontFamily: 'monospace', fontWeight: 700, color: '#147D78' }}>src/examples/</code> and it appears here automatically.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    backgroundColor: '#202124',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '8px 18px',
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  💻 Or Upload From This Computer...
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ================= SINGLE CENTERED VISUAL CANVAS ================= */}
         <div
@@ -768,7 +980,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
                   );
                 })}
 
-                {/* Full-resolution crisp image overlay when in Stage 0 or fused in Stage 6 (Smooth rendering!) */}
                 <img
                   src={stage === 6 ? data.reconstructedUrl : data.originalUrl}
                   alt="Canvas"
@@ -828,7 +1039,7 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
             </div>
           )}
 
-          {/* 2. STAGE 3: FREQUENCY DISTRIBUTION (Bars colored with the actual pixel color + high-contrast outline!) */}
+          {/* 2. STAGE 3: FREQUENCY DISTRIBUTION */}
           {stage === 3 && (
             <div
               style={{
@@ -846,7 +1057,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
             >
               {data.topSymbols.map((item) => (
                 <div key={item.symbol} style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-                  {/* Pixel Color Swatch */}
                   <div
                     style={{
                       width: '34px',
@@ -869,7 +1079,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
                   >
                     Byte {item.symbol}
                   </div>
-                  {/* Contrasting Track Container so even pure white pixel bars stand out clearly */}
                   <div
                     style={{
                       flex: 1,
@@ -930,7 +1139,6 @@ export const Slide13InteractiveDemo: React.FC<Slide13InteractiveDemoProps> = ({
               }}
             >
               <svg viewBox="0 0 800 410" style={{ width: '100%', height: '100%' }}>
-                {/* Bottom-up edges growing from children -> parent */}
                 {subStep >= 1 && (
                   <>
                     <CleanEdge childX={500} childY={345} childR={28} parentX={580} parentY={255} parentR={26} bit="0" active={subStep === 1} />
